@@ -41,7 +41,7 @@
 
                     <div class="d-flex justify-content-between mb-4">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="remember">
+                            <input class="form-check-input" type="checkbox" id="remember" name="remember">
                             <label class="form-check-label" for="remember">Ghi nhớ</label>
                         </div>
                         <a href="#" class="text-decoration-none text-danger">Quên mật khẩu?</a>
