@@ -41,6 +41,6 @@ class CategorySeeder extends Seeder
             ]);
         }
 
-        $this->command->info('✅ CategorySeeder: Đã tạo ' . count($categories) . ' categories');
+        $this->command->info('CategorySeeder: Đã tạo ' . count($categories) . ' categories');
     }
 }
