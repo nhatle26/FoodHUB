@@ -15,6 +15,8 @@ Route::prefix('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/user-register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/user-register', [RegisterController::class, 'register'])->name('register.post');
+    Route::get('/shop/register', [RegisterController::class, 'create'])->name('shop.create');
+Route::post('/shop/register', [RegisterController::class, 'store'])->name('shop.store');
 });
 // // Địa chỉ "cứu viện"
 // Route::get('/cuu-beng', function () {
@@ -55,4 +57,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile', [ProfileController::class, 'updateInfo'])->name('profile.update');
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 });
+
 
