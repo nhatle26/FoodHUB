@@ -3,16 +3,19 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Category;
+use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
     // Hiển thị form đăng ký
     public function showRegistrationForm()
     {
-        return view('auth.user_register');
+        return view('Auth.user_register');
     }
 
     // Xử lý đăng ký
