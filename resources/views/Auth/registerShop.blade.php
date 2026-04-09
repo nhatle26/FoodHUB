@@ -1,4 +1,5 @@
-﻿@extends('layouts.auth')
+﻿@extends('layouts.authShop')
+
 @section('title')
     Đăng ký mở shop
 @endsection

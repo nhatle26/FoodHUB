@@ -17,7 +17,7 @@
         <div class="col-lg-5 d-flex align-items-center justify-content-center bg-white">
             <div class="login-form-wrapper p-4 p-md-5">
                 <div class="text-center mb-4">
-    
+
                     <h2 class="fw-bold">Đăng Nhập</h2>
                     <p class="text-muted">Vui lòng nhập thông tin tài khoản của bạn</p>
                 </div>
@@ -64,7 +64,7 @@
                     Bạn chưa có tài khoản? <a href="{{ route('register') }}" class="text-danger fw-bold text-decoration-none">Đăng ký ngay</a>
                 </p>
                 <p class="text-center mt-2">
-                    Bạn là chủ cửa hàng? <a href="#" class="text-danger text-decoration-none">Đăng kí cửa hàng</a>
+                    Bạn là chủ cửa hàng? <a href="{{ route('shop.create') }}" class="text-danger text-decoration-none">Đăng kí cửa hàng</a>
                 </p>
             </div>
         </div>
