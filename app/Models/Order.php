@@ -27,4 +27,13 @@ class Order extends Model
         'cancelled_at',
         'cancel_reason',
     ];
+
+    public function items() {
+    return $this->hasMany(OrderItem::class);
+}
+
+public function user() {
+    return $this->belongsTo(User::class);
+}
+
 }

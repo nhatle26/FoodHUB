@@ -6,7 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Product;
+use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CartController extends Controller
 {
@@ -19,7 +23,6 @@ class CartController extends Controller
             ->where('user_id', Auth::id())
             ->get();
 
-        // Tính tổng tiền tạm tính
         $subtotal = $cartItems->sum(function($item) {
             return $item->product->price * $item->quantity;
         });
@@ -40,17 +43,15 @@ class CartController extends Controller
         $product = Product::findOrFail($request->product_id);
         $userId = Auth::id();
 
-        // 1. Kiểm tra xem giỏ hàng hiện tại có món của shop khác không
         $existingCartItem = Cart::where('user_id', $userId)->first();
 
         if ($existingCartItem && $existingCartItem->shop_id != $product->shop_id) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Bạn chỉ có thể đặt món tại 1 shop trong một đơn hàng. Vui lòng xóa giỏ hàng cũ nếu muốn đặt tại shop này!'
+                'message' => 'Bạn chỉ có thể đặt món tại 1 shop trong một đơn hàng!'
             ], 400);
         }
 
-        // 2. Kiểm tra nếu món này đã có trong giỏ thì tăng số lượng
         $cart = Cart::where('user_id', $userId)
                     ->where('product_id', $product->id)
                     ->first();
@@ -59,7 +60,6 @@ class CartController extends Controller
             $cart->quantity += $request->quantity;
             $cart->save();
         } else {
-            // 3. Nếu chưa có thì tạo mới
             Cart::create([
                 'user_id' => $userId,
                 'product_id' => $product->id,
@@ -70,42 +70,79 @@ class CartController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Đã thêm món vào giỏ hàng!',
+            'message' => 'Đã thêm vào giỏ!',
             'cart_count' => Cart::where('user_id', $userId)->count()
         ]);
     }
 
-    /**
-     * Cập nhật số lượng món ăn trong giỏ
-     */
     public function updateQuantity(Request $request, $id)
     {
         $cart = Cart::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
-
         $request->validate(['quantity' => 'required|integer|min:1']);
-
         $cart->update(['quantity' => $request->quantity]);
-
-        return back()->with('success', 'Đã cập nhật số lượng!');
+        return back()->with('success', 'Đã cập nhật!');
     }
 
-    /**
-     * Xóa 1 món khỏi giỏ hàng
-     */
     public function remove($id)
     {
         $cart = Cart::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         $cart->delete();
-
-        return back()->with('success', 'Đã xóa món khỏi giỏ hàng!');
+        return back()->with('success', 'Đã xóa món!');
     }
 
-    /**
-     * Xóa sạch giỏ hàng (Dùng khi user muốn đổi shop)
-     */
-    public function clear()
+    public function processCheckout(Request $request)
     {
-        Cart::where('user_id', Auth::id())->delete();
-        return back()->with('success', 'Đã làm trống giỏ hàng!');
+        $cartItems = Cart::where('user_id', auth()->id())->get();
+
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'Giỏ hàng trống!');
+        }
+
+        $subtotal = $cartItems->sum(function($item) {
+            return $item->product->price * $item->quantity;
+        });
+
+        try {
+            DB::beginTransaction();
+
+            $order = Order::create([
+                'user_id'          => auth()->id(),
+                'shop_id'          => $cartItems->first()->shop_id,
+                'order_code'       => 'FH-' . now()->format('Ymd') . '-' . strtoupper(Str::random(5)),
+                'customer_name'    => auth()->user()->name,
+                'customer_phone'   => auth()->user()->phone ?? '0123456789',
+                'delivery_address' => $request->delivery_address ?? auth()->user()->address ?? 'Đà Nẵng',
+                'note'             => $request->note,
+                'subtotal'         => $subtotal,
+                'delivery_fee'     => 0,
+                'discount_amount'  => 0,
+                'total_amount'     => $subtotal,
+                'payment_method'   => $request->payment_method ?? 'cod',
+                'payment_status'   => 'pending',
+                'status'           => 'pending',
+                'ordered_at'       => now(),
+            ]);
+
+            foreach ($cartItems as $item) {
+                OrderItem::create([
+                    'order_id'     => $order->id,
+                    'product_id'   => $item->product_id,
+                    'product_name' => $item->product->name,
+                    'unit_price'   => $item->product->price,
+                    'quantity'     => $item->quantity,
+                    'line_total'   => $item->product->price * $item->quantity,
+                    'note'         => null,
+                ]);
+            }
+
+            Cart::where('user_id', auth()->id())->delete();
+
+            DB::commit();
+            return redirect()->route('cart.index')->with('success', 'Bèng đặt đơn thành công rồi!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Lỗi: ' . $e->getMessage());
+        }
     }
 }

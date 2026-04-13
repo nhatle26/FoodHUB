@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Customer\CartController;
 
+
 // Group các route liên quan đến Auth
 Route::prefix('auth')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -78,3 +79,5 @@ Route::middleware(['auth'])->group(function () {
     // Xóa sạch giỏ
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 });
+
+Route::post('/checkout/process', [CartController::class, 'processCheckout'])->name('checkout.process');
