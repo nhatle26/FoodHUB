@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Shop\ShopController;
+use App\Http\Controllers\Shop\ProductController;
+use App\Http\Controllers\Shop\OrderController;
 
 // Group các route liên quan đến Auth
 Route::prefix('auth')->group(function () {
@@ -18,7 +21,17 @@ Route::prefix('auth')->group(function () {
     Route::get('/shop-register', [RegisterController::class, 'create'])->name('shop.create');
 Route::post('/shop-register', [RegisterController::class, 'store'])->name('shop.store');
 });
-// // Địa chỉ "cứu viện"
+
+// Shop Routes
+Route::prefix('shop')->name('shop.')->middleware('auth')->group(function () {
+    Route::get('/dashboard', [ShopController::class, 'dashboard'])->name('dashboard');
+    Route::resource('products', ProductController::class);
+    Route::resource('orders', OrderController::class);
+    Route::get('/revenue', [ShopController::class, 'revenue'])->name('revenue');
+    Route::get('/settings', [ShopController::class, 'settings'])->name('settings');
+});
+
+// Địa chỉ "cứu viện"
 // Route::get('/cuu-beng', function () {
 //     try {
 //         // 1. Dọn sạch data cũ (Nếu có)
