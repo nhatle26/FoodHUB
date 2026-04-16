@@ -58,4 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 });
 
+// Route chính cho trang chủ
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
 

@@ -45,10 +45,10 @@
                             <input class="form-check-input" type="checkbox" id="remember" name="remember">
                             <label class="form-check-label" for="remember">Ghi nhớ</label>
                         </div>
-                        <a href="#" class="text-decoration-none text-danger">Quên mật khẩu?</a>
+                        <a href="#" class="text-decoration-none text-brand">Quên mật khẩu?</a>
                     </div>
 
-                    <button type="submit" class="btn btn-danger w-100 py-2 fw-bold mb-3">ĐĂNG NHẬP</button>
+                    <button type="submit" class="btn btn-brand w-100 py-2 fw-bold mb-3">ĐĂNG NHẬP</button>
 
                     <div class="divider text-center my-3">
                         <span class="px-2 text-muted">Hoặc</span>
@@ -61,10 +61,10 @@
                 </form>
 
                 <p class="text-center mt-4">
-                    Bạn chưa có tài khoản? <a href="{{ route('register') }}" class="text-danger fw-bold text-decoration-none">Đăng ký ngay</a>
+                    Bạn chưa có tài khoản? <a href="{{ route('register') }}" class="text-brand fw-bold text-decoration-none">Đăng ký ngay</a>
                 </p>
                 <p class="text-center mt-2">
-                    Bạn là chủ cửa hàng? <a href="{{ route('shop.create') }}" class="text-danger text-decoration-none">Đăng kí cửa hàng</a>
+                    Bạn là chủ cửa hàng? <a href="{{ route('shop.create') }}" class="text-brand text-decoration-none">Đăng kí cửa hàng</a>
                 </p>
             </div>
         </div>
