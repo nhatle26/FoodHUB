@@ -16,10 +16,11 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa;
+            background-color: var(--bs-body-bg);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         main {
             flex: 1; /* Đẩy footer xuống cuối trang */
@@ -46,6 +47,39 @@
     @include('layouts.partials.footer')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('darkModeToggle');
+            const rootElement = document.documentElement;
+            
+            // Tải tuỳ chọn trước đó
+            const currentTheme = localStorage.getItem('theme');
+            if (currentTheme) {
+                rootElement.setAttribute('data-bs-theme', currentTheme);
+                updateToggleButton(currentTheme, toggleBtn);
+            }
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    const isDark = rootElement.getAttribute('data-bs-theme') === 'dark';
+                    const newTheme = isDark ? 'light' : 'dark';
+                    
+                    rootElement.setAttribute('data-bs-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    updateToggleButton(newTheme, toggleBtn);
+                });
+            }
+
+            function updateToggleButton(theme, btn) {
+                if (!btn) return;
+                if (theme === 'dark') {
+                    btn.innerHTML = '<i class="fas fa-sun text-warning me-2"></i> Chuyển màu Sáng';
+                } else {
+                    btn.innerHTML = '<i class="fas fa-moon text-muted me-2"></i> Chuyển màu Tối';
+                }
+            }
+        });
+    </script>
     @yield('scripts')
 </body>
 </html>

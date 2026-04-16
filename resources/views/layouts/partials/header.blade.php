@@ -9,19 +9,9 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarMain">
-            <ul class="navbar-nav mx-auto">
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold {{ request()->is('/') ? 'text-brand' : '' }}" href="{{ route('home') ?? '/' }}">Trang chủ</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="#">Khuyến mãi</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="#">Quán yêu thích</a>
-                </li>
-            </ul>
 
-            <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+
+            <div class="d-flex align-items-center gap-3 ms-auto mt-3 mt-lg-0">
                 <a href="#" class="position-relative text-dark text-decoration-none me-3">
                     <i class="fas fa-shopping-cart fs-5"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-brand" style="font-size: 0.65rem;">
@@ -31,16 +21,25 @@
 
                 @auth
                     <div class="dropdown">
-                        <a class="text-decoration-none text-dark dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                        <a class="text-decoration-none text-dark dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="me-2 fw-medium">{{ Auth::user()->name }}</span>
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=dc3545&color=fff" class="rounded-circle" width="36" height="36" alt="Avatar">
+                            @if(Auth::user()->avatar)
+                                <img src="{{ asset(Auth::user()->avatar) }}" class="rounded-circle shadow-sm" width="38" height="38" style="object-fit: cover;" alt="Avatar">
+                            @else
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=ff5a36&color=fff" class="rounded-circle shadow-sm" width="38" height="38" alt="Avatar">
+                            @endif
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3">
-                            <li><a class="dropdown-item py-2" href="{{ route('profile') }}"><i class="fas fa-user text-muted me-2"></i> Hồ sơ của tôi</a></li>
-                            <li><a class="dropdown-item py-2" href="#"><i class="fas fa-clipboard-list text-muted me-2"></i> Đơn hàng</a></li>
-                            @if(Auth::user()->role === 'admin')
-                                <li><a class="dropdown-item py-2" href="#"><i class="fas fa-cogs text-muted me-2"></i> Quản trị hệ thống</a></li>
-                            @endif
+                            <li>
+                                <a class="dropdown-item py-2" href="{{ route('profile') }}">
+                                    <i class="fas fa-user-circle text-muted me-2"></i> Hồ sơ cá nhân
+                                </a>
+                            </li>
+                            <li>
+                                <button class="dropdown-item py-2" type="button" id="darkModeToggle">
+                                    <i class="fas fa-moon text-muted me-2"></i> Đổi màu Tối
+                                </button>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form action="{{ route('logout') }}" method="POST">

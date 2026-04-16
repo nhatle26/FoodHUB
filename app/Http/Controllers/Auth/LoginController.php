@@ -24,11 +24,20 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials, $request->remember)) {
             $request->session()->regenerate();
-            return redirect()->intended('dashboard'); // Chuyển hướng sau khi thành công
+            return redirect()->intended('/'); // Chuyển hướng sau khi thành công
         }
 
         return back()->withErrors([
             'email' => 'Thông tin đăng nhập không chính xác.',
         ])->onlyInput('email');
+    }
+
+    // Xử lý đăng xuất
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/');
     }
 }

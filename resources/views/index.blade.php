@@ -40,14 +40,35 @@
         </a>
 
         @if(isset($categories))
+            @php
+                $iconMap = [
+                    'icons/trasua.png' => 'fas fa-mug-hot',
+                    'icons/doanvan.png' => 'fas fa-cookie',
+                    'icons/fastfood.png' => 'fas fa-hamburger',
+                    'icons/com.png' => 'fas fa-box',
+                    'icons/banhmi.png' => 'fas fa-hotdog',
+                    'icons/trangmieng.png' => 'fas fa-ice-cream',
+                    'icons/bunpho.png' => 'fas fa-bowl-rice',
+                    'icons/pizza.png' => 'fas fa-pizza-slice',
+                    'icons/cafe.png' => 'fas fa-coffee',
+                    'icons/haisan.png' => 'fas fa-fish',
+                    'icons/comtam.png' => 'fas fa-utensils',
+                    'icons/chay.png' => 'fas fa-leaf',
+                    'icons/nuocep.png' => 'fas fa-glass-martini-alt',
+                    'icons/mi.png' => 'fas fa-bacon',
+                    'icons/banhngot.png' => 'fas fa-birthday-cake',
+                    'icons/nuong.png' => 'fas fa-fire',
+                    'icons/garan.png' => 'fas fa-drumstick-bite',
+                    'icons/salad.png' => 'fas fa-carrot',
+                ];
+            @endphp
             @foreach($categories as $category)
             <a href="{{ route('home', ['category' => $category->id, 'search' => request('search')]) }}" class="category-item {{ request('category') == $category->id ? 'active' : '' }}">
                 <div class="category-icon-box">
-                    @if($category->icon)
-                        <img src="{{ asset('storage/'.$category->icon) }}" alt="{{ $category->name }}">
-                    @else
-                        <i class="fas fa-utensils"></i>
-                    @endif
+                    @php
+                        $faIcon = $iconMap[$category->icon] ?? 'fas fa-utensils';
+                    @endphp
+                    <i class="{{ $faIcon }}"></i>
                 </div>
                 <span>{{ $category->name }}</span>
             </a>

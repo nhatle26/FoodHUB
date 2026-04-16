@@ -19,7 +19,7 @@ class ProfileController extends Controller
 
     public function show()
     {
-        return view('Auth.profile', ['user' => Auth::user()]);
+        return view('profile', ['user' => Auth::user()]);
     }
 
     public function updateInfo(Request $request)
