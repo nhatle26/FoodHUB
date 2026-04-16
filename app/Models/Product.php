@@ -17,4 +17,9 @@ class Product extends Model
         'total_sold',
         'sort_order',
     ];
+
+    public function shop()
+{
+    return $this->belongsTo(Shop::class);
+}
 }

@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Customer\CartController;
+
 
 // Group các route liên quan đến Auth
 Route::prefix('auth')->group(function () {
@@ -63,3 +65,22 @@ Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('ho
 
 // Route chi tiết quán ăn
 Route::get('/shop/{id}', [App\Http\Controllers\ShopController::class, 'show'])->name('shop.show');
+
+Route::middleware(['auth'])->group(function () {
+    // Trang danh sách giỏ hàng
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+
+    // Thêm món (dùng POST)
+    Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
+
+    // Cập nhật số lượng
+    Route::patch('/cart/update/{id}', [CartController::class, 'updateQuantity'])->name('cart.update');
+
+    // Xóa từng món
+    Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+
+    // Xóa sạch giỏ
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+});
+
+Route::post('/checkout/process', [CartController::class, 'processCheckout'])->name('checkout.process');
