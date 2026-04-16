@@ -26,14 +26,22 @@ class Order extends Model
         'delivered_at',
         'cancelled_at',
         'cancel_reason',
+        'total',
+        'customer_address',
     ];
 
-    public function items() {
-    return $this->hasMany(OrderItem::class);
-}
+    public function shop()
+    {
+        return $this->belongsTo(Shop::class);
+    }
 
-public function user() {
-    return $this->belongsTo(User::class);
-}
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 }
