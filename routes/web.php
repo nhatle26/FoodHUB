@@ -61,4 +61,5 @@ Route::middleware('auth')->group(function () {
 // Route chính cho trang chủ
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-
+// Route chi tiết quán ăn
+Route::get('/shop/{id}', [App\Http\Controllers\ShopController::class, 'show'])->name('shop.show');

@@ -91,7 +91,7 @@
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-5">
             @foreach($shops as $shop)
             <div class="col">
-                <a href="#" class="text-decoration-none text-dark">
+                <a href="{{ route('shop.show', $shop->id) }}" class="text-decoration-none text-dark">
                     <div class="card shop-card h-100">
                         <div class="position-relative">
                             <img src="{{ $shop->image ? asset('storage/'.$shop->image) : 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80' }}" class="card-img-top" alt="{{ $shop->name }}">
