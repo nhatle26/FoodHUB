@@ -80,4 +80,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 });
 
+Route::get('/checkout', [CartController::class, 'index'])->name('cart.index');
+
 Route::post('/checkout/process', [CartController::class, 'processCheckout'])->name('checkout.process');
