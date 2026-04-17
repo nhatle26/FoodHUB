@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\User;
+use App\Models\Order;
+use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -87,6 +89,100 @@ class AdminController extends Controller
             ->update(['status' => 'banned', 'updated_at' => now()]);
 
         return redirect()->route('admin.dashboard')->with('success', 'Shop đã bị từ chối và sẽ không còn hiển thị ở danh sách chờ duyệt.');
+    }
+
+    public function orders(Request $request)
+    {
+        $query = Order::with(['user', 'shop']);
+
+        // Filter by shop
+        if ($request->filled('shop_id')) {
+            $query->where('shop_id', $request->shop_id);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by date
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $orders = $query->orderByDesc('created_at')->paginate(20);
+
+        $shops = Shop::all();
+
+        return view('admin.orders.index', compact('orders', 'shops'));
+    }
+
+    public function exportOrders(Request $request)
+    {
+        $query = Order::with(['user', 'shop', 'items']);
+
+        // Same filters as above
+        if ($request->filled('shop_id')) {
+            $query->where('shop_id', $request->shop_id);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $orders = $query->orderByDesc('created_at')->get();
+
+        $filename = 'orders_' . now()->format('Y-m-d_H-i-s') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($orders) {
+            $file = fopen('php://output', 'w');
+
+            // CSV headers
+            fputcsv($file, [
+                'Order Code',
+                'Customer Name',
+                'Customer Phone',
+                'Shop Name',
+                'Total Amount',
+                'Status',
+                'Payment Method',
+                'Ordered At',
+                'Delivery Address',
+                'Note'
+            ]);
+
+            foreach ($orders as $order) {
+                fputcsv($file, [
+                    $order->order_code,
+                    $order->customer_name,
+                    $order->customer_phone,
+                    $order->shop->name,
+                    $order->total,
+                    $order->status,
+                    $order->payment_method,
+                    $order->created_at->format('Y-m-d H:i:s'),
+                    $order->delivery_address,
+                    $order->note
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**

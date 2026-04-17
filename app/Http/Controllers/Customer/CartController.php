@@ -114,13 +114,12 @@ class CartController extends Controller
                 'delivery_address' => $request->delivery_address ?? auth()->user()->address ?? 'Đà Nẵng',
                 'note'             => $request->note,
                 'subtotal'         => $subtotal,
-                'delivery_fee'     => 0,
-                'discount_amount'  => 0,
-                'total_amount'     => $subtotal,
+                'shipping_fee'     => 0,
+                'discount'         => 0,
+                'total'            => $subtotal,
                 'payment_method'   => $request->payment_method ?? 'cod',
                 'payment_status'   => 'pending',
                 'status'           => 'pending',
-                'ordered_at'       => now(),
             ]);
 
             foreach ($cartItems as $item) {
@@ -128,10 +127,9 @@ class CartController extends Controller
                     'order_id'     => $order->id,
                     'product_id'   => $item->product_id,
                     'product_name' => $item->product->name,
-                    'unit_price'   => $item->product->price,
+                    'product_price' => $item->product->price,
                     'quantity'     => $item->quantity,
-                    'line_total'   => $item->product->price * $item->quantity,
-                    'note'         => null,
+                    'subtotal'     => $item->product->price * $item->quantity,
                 ]);
             }
 

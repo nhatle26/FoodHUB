@@ -51,6 +51,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('shops/{shop}/reject', [AdminController::class, 'rejectShop'])->name('shops.reject');
     Route::resource('users', AdminController::class);
     Route::resource('categories', CategoryController::class)->except(['show']);
+    Route::get('orders', [AdminController::class, 'orders'])->name('orders.index');
+    Route::get('orders/export', [AdminController::class, 'exportOrders'])->name('orders.export');
 });
 
 Route::middleware('auth')->group(function () {

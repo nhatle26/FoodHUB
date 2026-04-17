@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('order_code', 20)->unique(); // VD: FH-20240115-001
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('shop_id')->constrained()->onDelete('cascade');
+            $table->string('customer_name', 100)->nullable();
             $table->decimal('subtotal', 12, 0);       // tổng tiền món
             $table->decimal('shipping_fee', 10, 0)->default(15000);
             $table->decimal('discount', 10, 0)->default(0);

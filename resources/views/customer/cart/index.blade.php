@@ -20,7 +20,7 @@
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-                        <h6 class="fw-bold mb-0">Phở Hà Nội Truyền Thống</h6>
+                        <h6 class="fw-bold mb-0">{{ $cartItems->first()->shop->name ?? 'Shop' }}</h6>
                         <a href="/" class="text-muted small text-decoration-none hover-primary">Thêm món</a>
                     </div>
 
@@ -32,13 +32,30 @@
                                 <div class="ms-3">
                                     <h6 class="mb-1 fw-bold">{{ $item->product->name }}</h6>
                                     <div class="d-flex align-items-center bg-light rounded-pill px-2 border" style="width: fit-content;">
-                                        <button type="button" class="btn btn-sm p-0 px-2 text-muted">-</button>
+                                        <form action="{{ route('cart.update', $item->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="quantity" value="{{ $item->quantity - 1 }}">
+                                            <button type="submit" class="btn btn-sm p-0 px-2 text-muted" {{ $item->quantity <= 1 ? 'disabled' : '' }}>-</button>
+                                        </form>
                                         <span class="px-2 fw-bold small">{{ $item->quantity }}</span>
-                                        <button type="button" class="btn btn-sm p-0 px-2 text-muted">+</button>
+                                        <form action="{{ route('cart.update', $item->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="quantity" value="{{ $item->quantity + 1 }}">
+                                            <button type="submit" class="btn btn-sm p-0 px-2 text-muted">+</button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
-                            <span class="fw-bold text-danger fs-5">{{ number_format($item->product->price * $item->quantity) }}đ</span>
+                            <div class="text-end">
+                                <span class="fw-bold text-danger fs-5">{{ number_format($item->product->price * $item->quantity) }}đ</span>
+                                <form action="{{ route('cart.remove', $item->id) }}" method="POST" class="d-inline ms-2">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-0">Xóa</button>
+                                </form>
+                            </div>
                         </div>
                         @empty
                         <div class="text-center py-4 text-muted">Giỏ hàng đang chờ món từ Bèng đó!</div>
@@ -97,7 +114,7 @@
                             <p class="mb-1 fw-bold text-dark">{{ Auth::user()->name }}</p>
                             <p class="mb-1 small text-muted">{{ Auth::user()->phone ?? '0123456789' }}</p>
                             <p class="small text-muted mb-2">{{ Auth::user()->address ?? 'Vui lòng cập nhật địa chỉ' }}</p>
-                            <input type="hidden" name="delivery_address" value="{{ Auth::user()->address }}">
+                            <textarea name="delivery_address" class="form-control bg-light border-0 rounded-3 shadow-sm" rows="2" placeholder="Nhập địa chỉ giao hàng">{{ Auth::user()->address ?? 'Đà Nẵng' }}</textarea>
                             <span class="badge bg-danger text-white rounded-pill px-2" style="font-size: 10px;">Mặc định</span>
                         </div>
                         <button type="button" class="btn btn-outline-secondary w-100 mt-3 btn-sm rounded-3">Thêm địa chỉ mới</button>

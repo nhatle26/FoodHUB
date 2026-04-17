@@ -406,7 +406,7 @@
                 <a href="{{ route('admin.users.index') }}" class="nav-link-admin {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">👥 Quản lý Người dùng</a>
                 <a href="{{ route('admin.categories.index') }}" class="nav-link-admin {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">🗂 Quản lý Danh mục</a>
                 <a href="{{ route('admin.shops.pending') }}" class="nav-link-admin {{ request()->routeIs('admin.shops.*') ? 'active' : '' }}">🏪 Quản lý Shop</a>
-                <a href="#" class="nav-link-admin">🧾 Quản lý Đơn hàng</a>
+                <a href="{{ route('admin.orders.index') }}" class="nav-link-admin {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">🧾 Quản lý Đơn hàng</a>
                 <a href="#" class="nav-link-admin">📊 Báo cáo & Thống kê</a>
                 <a href="#" class="nav-link-admin">⚙️ Cài đặt</a>
             </nav>
