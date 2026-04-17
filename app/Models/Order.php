@@ -15,13 +15,11 @@ class Order extends Model
         'delivery_address',
         'note',
         'subtotal',
-        'delivery_fee',
-        'discount_amount',
-        'total_amount',
+        'shipping_fee',
+        'discount',
+        'total',
         'payment_method',
-        'payment_status',
         'status',
-        'ordered_at',
         'confirmed_at',
         'delivered_at',
         'cancelled_at',
@@ -34,6 +32,10 @@ class Order extends Model
 
 public function user() {
     return $this->belongsTo(User::class);
+}
+
+public function shop() {
+    return $this->belongsTo(Shop::class);
 }
 
 }
