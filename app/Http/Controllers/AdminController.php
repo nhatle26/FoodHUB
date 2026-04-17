@@ -93,7 +93,7 @@ class AdminController extends Controller
 
     public function orders(Request $request)
     {
-        $query = Order::with(['user', 'shop']);
+        $query = Order::with(['user']);
 
         // Filter by shop
         if ($request->filled('shop_id')) {
@@ -122,7 +122,7 @@ class AdminController extends Controller
 
     public function exportOrders(Request $request)
     {
-        $query = Order::with(['user', 'shop', 'items']);
+        $query = Order::with(['user', 'items']);
 
         // Same filters as above
         if ($request->filled('shop_id')) {
