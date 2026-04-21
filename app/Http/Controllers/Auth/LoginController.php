@@ -24,7 +24,16 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials, $request->remember)) {
             $request->session()->regenerate();
-            return redirect()->intended('/'); // Chuyển hướng sau khi thành công
+            
+            $role = Auth::user()->role ?? 'customer';
+            
+            if ($role === 'admin') {
+                return redirect()->intended('/admin');
+            } elseif ($role === 'shop') {
+                return redirect()->intended('/shop/dashboard');
+            }
+            
+            return redirect()->intended('/');
         }
 
         return back()->withErrors([

@@ -15,9 +15,9 @@
 
 <!-- Hero Banner Mở Rộng -->
 <div class="shop-hero" style="background-image: url('{{ $shopData['banner'] }}');">
-    <!-- Ảnh inset tô Phở góc trái dưới -->
+    <!-- Ảnh inset Logo góc trái dưới -->
     <div class="shop-hero-inset">
-        <img src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=200&q=80" alt="Tô Phở Việt Nam">
+        <img src="{{ $shopData['logo'] }}" alt="Logo {{ $shopData['name'] }}">
     </div>
 </div>
 
@@ -54,10 +54,11 @@
         <div class="category-menu-card">
             <h4 class="category-menu-title">Danh mục</h4>
             <div class="d-flex flex-column">
-                <a href="#cat-khai-vi" class="menu-link active">Khai vị</a>
-                <a href="#cat-mon-chinh" class="menu-link">Món chính</a>
-                <a href="#cat-do-uong" class="menu-link">Đồ uống</a>
-                <a href="#cat-trang-mieng" class="menu-link">Tráng miệng</a>
+                @php $first = true; @endphp
+                @foreach(array_keys($menuCategories) as $catName)
+                    <a href="#cat-{{ Str::slug($catName) }}" class="menu-link {{ $first ? 'active' : '' }}">{{ $catName }}</a>
+                    @php $first = false; @endphp
+                @endforeach
             </div>
         </div>
     </aside>
@@ -108,7 +109,7 @@
                     <span class="cart-total-value">0đ</span>
                 </div>
 
-                <button class="btn btn-checkout" onclick="alert('Tính năng đặt hàng sẽ được phát triển sau!')">Đặt hàng</button>
+                <button class="btn btn-checkout" onclick="processLocalCheckout()">Đặt hàng</button>
 
             </div>
         </div>
@@ -175,6 +176,60 @@
         } else {
             cartTotalEl.innerText = new Intl.NumberFormat('vi-VN').format(total) + 'đ';
         }
+    }
+
+    async function processLocalCheckout() {
+        const isAuth = {{ Auth::check() ? 'true' : 'false' }};
+        if (!isAuth) {
+            alert('Bạn cần đăng nhập để đặt hàng!');
+            window.location.href = "{{ route('login') }}";
+            return;
+        }
+
+        if (Object.keys(cart).length === 0) {
+            return alert('Giỏ hàng của bạn đang trống!');
+        }
+        
+        let btn = document.querySelector('.btn-checkout');
+        let originalText = btn.innerText;
+        btn.innerText = 'Đang xử lý...';
+        btn.disabled = true;
+
+        for (let id in cart) {
+            let item = cart[id];
+            try {
+                let res = await fetch("{{ route('cart.add') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        product_id: parseInt(id),
+                        quantity: item.qty
+                    })
+                });
+                
+                let data = await res.json();
+                
+                if (data.status === 'error') {
+                    alert(data.message);
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    return; // Fail on current shop overlapping
+                }
+            } catch(e) {
+                console.error(e);
+                alert("Đã xảy ra lỗi máy chủ! Xin thử lại.");
+                btn.innerText = originalText;
+                btn.disabled = false;
+                return;
+            }
+        }
+        
+        // Hoàn tất lưu xuống Carts table, redirect qua trang giỏ hàng của Customer 
+        window.location.href = "{{ route('cart.index') }}";
     }
 
     // Khởi tạo giỏ hàng rỗng khi load trang

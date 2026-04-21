@@ -12,10 +12,10 @@
 
 
             <div class="d-flex align-items-center gap-3 ms-auto mt-3 mt-lg-0">
-                <a href="#" class="position-relative text-dark text-decoration-none me-3">
+                <a href="{{ route('cart.index') }}" class="position-relative text-dark text-decoration-none me-3">
                     <i class="fas fa-shopping-cart fs-5"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-brand" style="font-size: 0.65rem;">
-                        0
+                        {{ Auth::check() ? \App\Models\Cart::where('user_id', Auth::id())->sum('quantity') : 0 }}
                     </span>
                 </a>
 
