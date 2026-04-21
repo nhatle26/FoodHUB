@@ -5,6 +5,11 @@
 @section('page-subtitle', 'Cập nhật thông tin tài khoản')
 
 @section('content')
+@php
+    $userName = $user->customer->full_name ?? ($user->shop->name ?? $user->email);
+    $userPhone = $user->customer->phone ?? ($user->shop->details->phone ?? '');
+    $userAddress = $user->customer->addresses->where('is_default', 1)->first()->address_line ?? ($user->shop->details->address ?? '');
+@endphp
     <div class="admin-card" style="max-width:760px;">
         <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
             @csrf
@@ -12,7 +17,7 @@
 
             <div class="mb-3">
                 <label for="name" class="form-label">Tên</label>
-                <input type="text" id="name" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $user->name) }}" required>
+                <input type="text" id="name" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $userName) }}" required>
                 @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 
@@ -47,14 +52,14 @@
                 </div>
                 <div class="col-md-6">
                     <label for="phone" class="form-label">Điện thoại</label>
-                    <input type="text" id="phone" name="phone" class="form-control @error('phone') is-invalid @enderror" value="{{ old('phone', $user->phone) }}">
+                    <input type="text" id="phone" name="phone" class="form-control @error('phone') is-invalid @enderror" value="{{ old('phone', $userPhone) }}">
                     @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
             </div>
 
             <div class="mb-3 mt-3">
                 <label for="address" class="form-label">Địa chỉ</label>
-                <textarea id="address" name="address" rows="3" class="form-control @error('address') is-invalid @enderror">{{ old('address', $user->address) }}</textarea>
+                <textarea id="address" name="address" rows="3" class="form-control @error('address') is-invalid @enderror">{{ old('address', $userAddress) }}</textarea>
                 @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 

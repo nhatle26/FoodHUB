@@ -86,7 +86,7 @@
                         @foreach($shop->orders->sortByDesc('created_at')->take(6) as $order)
                             <tr>
                                 <td><strong>#{{ $order->id }}</strong></td>
-                                <td>{{ $order->user ? $order->user->name : ($order->customer_name ?? 'N/A') }}</td>
+                                <td>{{ $order->user->customer->full_name ?? ($order->user->shop->name ?? $order->user->email) }}</td>
                                 <td class="price">{{ number_format($order->total ?? 0, 0, ',', '.') }}₫</td>
                                 <td>
                                     <span class="status-badge status-{{ $order->status ?? 'pending' }}">

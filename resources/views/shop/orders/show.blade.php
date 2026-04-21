@@ -17,14 +17,14 @@
             <div class="order-section">
                 <h3>Trạng thái đơn hàng</h3>
                 <div class="status-timeline">
-                    <div class="timeline-item @if(in_array($order->status, ['confirmed', 'shipped', 'delivered'])) completed @endif">
+                    <div class="timeline-item @if(in_array($order->status, ['confirmed', 'preparing', 'delivering', 'delivered'])) completed @endif">
                         <div class="timeline-icon"><i class="bi bi-check-circle"></i></div>
                         <div class="timeline-text">
                             <div class="timeline-label">Chờ xử lý</div>
                             <small>{{ $order->created_at->format('d/m/Y H:i') }}</small>
                         </div>
                     </div>
-                    <div class="timeline-item @if(in_array($order->status, ['shipped', 'delivered'])) completed @endif">
+                    <div class="timeline-item @if(in_array($order->status, ['delivering', 'delivered'])) completed @endif">
                         <div class="timeline-icon"><i class="bi bi-check-circle"></i></div>
                         <div class="timeline-text">
                             <div class="timeline-label">Đã xác nhận</div>
@@ -54,15 +54,15 @@
                 <div class="info-grid">
                     <div class="info-item">
                         <label>Tên khách hàng</label>
-                        <p>{{ $order->user ? $order->user->name : ($order->customer_name ?? 'N/A') }}</p>
+                        <p>{{ $order->user->customer->full_name ?? ($order->user->shop->name ?? $order->user->email) }}</p>
                     </div>
                     <div class="info-item">
                         <label>Số điện thoại</label>
-                        <p>{{ $order->customer_phone }}</p>
+                        <p>{{ $order->delivery->customer_phone ?? 'N/A' }}</p>
                     </div>
                     <div class="info-item full-width">
                         <label>Địa chỉ giao hàng</label>
-                        <p>{{ $order->delivery_address }}</p>
+                        <p>{{ $order->delivery->delivery_address ?? 'N/A' }}</p>
                     </div>
                 </div>
             </div>
@@ -120,7 +120,7 @@
                             @case('confirmed')
                                 Đã xác nhận
                                 @break
-                            @case('shipped')
+                            @case('delivering')
                                 Đang giao
                                 @break
                             @case('delivered')
@@ -151,7 +151,7 @@
                             <select id="statusSelect" class="status-select-show" style="flex: 1;">
                                 <option value="pending" @if($order->status == 'pending') selected @endif>Chờ xử lý</option>
                                 <option value="confirmed" @if($order->status == 'confirmed') selected @endif>Đã xác nhận</option>
-                                <option value="shipped" @if($order->status == 'shipped') selected @endif>Đang giao</option>
+                                <option value="delivering" @if($order->status == 'delivering') selected @endif>Đang giao</option>
                                 <option value="delivered" @if($order->status == 'delivered') selected @endif>Đã giao</option>
                                 <option value="cancelled" @if($order->status == 'cancelled') selected @endif>Đã hủy</option>
                             </select>

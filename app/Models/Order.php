@@ -10,25 +10,21 @@ class Order extends Model
         'user_id',
         'shop_id',
         'order_code',
-        'customer_name',
-        'customer_phone',
-        'delivery_address',
-        'note',
         'subtotal',
-        'delivery_fee',
-        'discount_amount',
-        'total_amount',
-        'payment_method',
-        'payment_status',
-        'status',
-        'ordered_at',
-        'confirmed_at',
-        'delivered_at',
-        'cancelled_at',
-        'cancel_reason',
+        'shipping_fee',
+        'discount',
         'total',
-        'customer_address',
+        'payment_method',
+        'status',
+        'confirmed_at',
+        'cancel_reason',
+        'voucher_code',
     ];
+
+    public function delivery()
+    {
+        return $this->hasOne(OrderDelivery::class);
+    }
 
     public function shop()
     {

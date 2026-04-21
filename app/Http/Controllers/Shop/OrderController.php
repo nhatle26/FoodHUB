@@ -58,16 +58,22 @@ class OrderController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.price' => 'required|numeric|min:0',
             'total' => 'required|numeric|min:0',
-            'status' => 'nullable|in:pending,confirmed,shipped,delivered,cancelled',
+            'status' => 'nullable|in:pending,confirmed,preparing,delivering,delivered,cancelled',
         ]);
 
         $order = Order::create([
+            'user_id' => Auth::id(),
             'shop_id' => $shop->id,
-            'customer_name' => $validated['customer_name'],
-            'customer_phone' => $validated['customer_phone'],
-            'customer_address' => $validated['customer_address'],
+            'order_code' => 'FH-' . now()->format('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(5)),
+            'subtotal' => $validated['total'],
             'total' => $validated['total'],
             'status' => $validated['status'] ?? 'pending',
+        ]);
+
+        \App\Models\OrderDelivery::create([
+            'order_id' => $order->id,
+            'customer_phone' => $validated['customer_phone'],
+            'delivery_address' => $validated['customer_address'],
         ]);
 
         return redirect()->route('shop.orders.show', $order)->with('success', 'Đơn hàng đã được tạo thành công!');
@@ -117,7 +123,7 @@ class OrderController extends Controller
         }
 
         $validated = $request->validate([
-            'status' => 'required|in:pending,confirmed,shipped,delivered,cancelled',
+            'status' => 'required|in:pending,confirmed,preparing,delivering,delivered,cancelled',
         ]);
 
         $order->update($validated);

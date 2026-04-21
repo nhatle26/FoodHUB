@@ -31,7 +31,7 @@
                     @forelse ($users as $index => $user)
                         <tr>
                             <td>{{ $users->firstItem() + $index }}</td>
-                            <td><strong>{{ $user->name }}</strong></td>
+                            <td><strong>{{ $user->customer->full_name ?? ($user->shop->name ?? $user->email) }}</strong></td>
                             <td>{{ $user->email }}</td>
                             <td>
                                 @if ($user->role === 'admin')
@@ -42,7 +42,7 @@
                                     <span class="badge bg-info">Customer</span>
                                 @endif
                             </td>
-                            <td>{{ $user->phone ?? 'N/A' }}</td>
+                            <td>{{ $user->customer->phone ?? ($user->shop->details->phone ?? 'N/A') }}</td>
                             <td>
                                 @if ($user->is_active)
                                     <span class="badge bg-success">✓ Hoạt động</span>

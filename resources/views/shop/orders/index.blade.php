@@ -22,7 +22,7 @@
                 <option value="">Tất cả trạng thái</option>
                 <option value="pending">Chờ xử lý</option>
                 <option value="confirmed">Đã xác nhận</option>
-                <option value="shipped">Đang giao</option>
+                <option value="delivering">Đang giao</option>
                 <option value="delivered">Đã giao</option>
                 <option value="cancelled">Đã hủy</option>
             </select>
@@ -64,12 +64,12 @@
                     @foreach($orders as $order)
                         <tr>
                             <td><strong>#{{ $order->id }}</strong></td>
-                            <td>{{ $order->user ? $order->user->name : ($order->customer_name ?? 'N/A') }}</td>
+                            <td>{{ $order->user->customer->full_name ?? ($order->user->shop->name ?? $order->user->email) }}</td>
                             <td>
-                                <small>{{ $order->customer_phone }}</small>
+                                <small>{{ $order->delivery->customer_phone ?? 'N/A' }}</small>
                             </td>
                             <td>
-                                <small>{{ Str::limit($order->delivery_address, 30) }}</small>
+                                <small>{{ Str::limit($order->delivery->delivery_address ?? 'N/A', 30) }}</small>
                             </td>
                             <td class="center">{{ $order->items ? count($order->items) : 0 }}</td>
                             <td class="price">{{ number_format($order->total ?? 0, 0, ',', '.') }}₫</td>
@@ -82,7 +82,7 @@
                                         @case('confirmed')
                                             Đã xác nhận
                                             @break
-                                        @case('shipped')
+                                        @case('delivering')
                                             Đang giao
                                             @break
                                         @case('delivered')
@@ -105,7 +105,7 @@
                                     <select class="status-select" onchange="updateOrderStatus({{ $order->id }}, this.value)">
                                         <option value="pending" @if($order->status == 'pending') selected @endif>Chờ xử lý</option>
                                         <option value="confirmed" @if($order->status == 'confirmed') selected @endif>Đã xác nhận</option>
-                                        <option value="shipped" @if($order->status == 'shipped') selected @endif>Đang giao</option>
+                                        <option value="delivering" @if($order->status == 'delivering') selected @endif>Đang giao</option>
                                         <option value="delivered" @if($order->status == 'delivered') selected @endif>Đã giao</option>
                                         <option value="cancelled" @if($order->status == 'cancelled') selected @endif>Đã hủy</option>
                                     </select>

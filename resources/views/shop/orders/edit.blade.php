@@ -20,7 +20,7 @@
                 <select id="status" name="status" class="form-control @error('status') is-invalid @enderror" required>
                     <option value="pending" @if($order->status == 'pending') selected @endif>Chờ xử lý</option>
                     <option value="confirmed" @if($order->status == 'confirmed') selected @endif>Đã xác nhận</option>
-                    <option value="shipped" @if($order->status == 'shipped') selected @endif>Đang giao</option>
+                    <option value="delivering" @if($order->status == 'delivering') selected @endif>Đang giao</option>
                     <option value="delivered" @if($order->status == 'delivered') selected @endif>Đã giao</option>
                     <option value="cancelled" @if($order->status == 'cancelled') selected @endif>Đã hủy</option>
                 </select>
@@ -35,17 +35,17 @@
 
             <div class="form-group">
                 <label>Khách hàng</label>
-                <p class="form-static">{{ $order->customer_name }}</p>
+                <p class="form-static">{{ $order->user->customer->full_name ?? ($order->user->shop->name ?? $order->user->email) }}</p>
             </div>
 
             <div class="form-group">
                 <label>Số điện thoại</label>
-                <p class="form-static">{{ $order->customer_phone }}</p>
+                <p class="form-static">{{ $order->delivery->customer_phone ?? 'N/A' }}</p>
             </div>
 
             <div class="form-group">
                 <label>Địa chỉ giao hàng</label>
-                <p class="form-static">{{ $order->customer_address }}</p>
+                <p class="form-static">{{ $order->delivery->delivery_address ?? 'N/A' }}</p>
             </div>
 
             <div class="form-group">

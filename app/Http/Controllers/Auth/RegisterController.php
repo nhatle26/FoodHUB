@@ -35,11 +35,15 @@ class RegisterController extends Controller
         }
 
         // Tạo user mới với role mặc định là customer
-        User::create([
-            'name' => $request->name,
+        $user = User::create([
             'email' => $request->email,
-            'password' => $request->password, // Sẽ được hash tự động bởi model
-            'role' => 'customer', // Role mặc định cho form đăng ký user
+            'password' => Hash::make($request->password),
+            'role' => 'customer',
+        ]);
+
+        \App\Models\Customer::create([
+            'user_id' => $user->id,
+            'full_name' => $request->name,
         ]);
 
         // Redirect về login với thông báo thành công
@@ -56,6 +60,8 @@ class RegisterController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|max:100|unique:shops,name',
+            'email' => 'required|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8',
             'phone' => 'required|max:15',
             'address' => 'required|max:255',
             'category_id' => 'required|exists:categories,id',
@@ -65,6 +71,8 @@ class RegisterController extends Controller
             'cover_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048|dimensions:min_width=1200,min_height=400,ratio=3/1',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:1024|dimensions:min_width=200,min_height=200,ratio=1/1',
         ], [
+            'email.unique' => 'Email này đã được sử dụng.',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
             'cover_image.mimes' => 'Ảnh bìa chỉ được phép là JPG hoặc PNG.',
             'cover_image.max' => 'Ảnh bìa không được lớn hơn 2MB.',
             'cover_image.dimensions' => 'Ảnh bìa phải tối thiểu 1200x400 và đúng tỷ lệ 3:1.',
@@ -74,18 +82,44 @@ class RegisterController extends Controller
             'close_time.after' => 'Giờ đóng cửa phải sau giờ mở cửa.',
         ]);
 
-        $data['user_id'] = 1;
-        $data['slug'] = $this->makeSlug($data['name']);
+        $user = User::create([
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'role' => 'shop',
+        ]);
 
+        $shop = Shop::create([
+            'user_id' => $user->id,
+            'category_id' => $data['category_id'],
+            'name' => $data['name'],
+            'slug' => $this->makeSlug($data['name']),
+            'status' => 'pending',
+        ]);
+
+        $cover_image = null;
         if ($request->hasFile('cover_image')) {
-            $data['cover_image'] = $request->file('cover_image')->store('shops/covers', 'public');
+            $cover_image = $request->file('cover_image')->store('shops/covers', 'public');
         }
 
+        $logo = null;
         if ($request->hasFile('logo')) {
-            $data['logo'] = $request->file('logo')->store('shops/logos', 'public');
+            $logo = $request->file('logo')->store('shops/logos', 'public');
         }
 
-        Shop::create($data);
+        \App\Models\ShopDetail::create([
+            'shop_id' => $shop->id,
+            'phone' => $data['phone'],
+            'address' => $data['address'],
+            'description' => $data['description'] ?? null,
+            'cover_image' => $cover_image,
+            'logo' => $logo,
+            'open_time' => $data['open_time'] ?? null,
+            'close_time' => $data['close_time'] ?? null,
+        ]);
+        
+        \App\Models\ShopMetric::create([
+            'shop_id' => $shop->id,
+        ]);
 
         return back()->with('success', 'Đăng ký shop thành công');
     }

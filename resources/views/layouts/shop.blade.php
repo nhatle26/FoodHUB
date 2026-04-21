@@ -47,7 +47,7 @@
                 <div class="user-info">
                     <div class="user-avatar"><i class="bi bi-person-circle"></i></div>
                     <div class="user-details">
-                        <div class="user-name">{{ Auth::user()->name ?? 'Shop' }}</div>
+                        <div class="user-name">{{ Auth::user()->customer->full_name ?? (Auth::user()->shop->name ?? Auth::user()->email) }}</div>
                         <div class="user-role">{{ Auth::user()->role ?? 'shop' }}</div>
                     </div>
                 </div>

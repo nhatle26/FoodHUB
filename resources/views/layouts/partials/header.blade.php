@@ -22,11 +22,11 @@
                 @auth
                     <div class="dropdown">
                         <a class="text-decoration-none text-dark dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="me-2 fw-medium">{{ Auth::user()->name }}</span>
-                            @if(Auth::user()->avatar)
-                                <img src="{{ asset(Auth::user()->avatar) }}" class="rounded-circle shadow-sm" width="38" height="38" style="object-fit: cover;" alt="Avatar">
+                            <span class="me-2 fw-medium">{{ Auth::user()->customer->full_name ?? (Auth::user()->shop->name ?? Auth::user()->email) }}</span>
+                            @if(Auth::user()->customer->avatar ?? (Auth::user()->shop->details->logo ?? null))
+                                <img src="{{ asset(Auth::user()->customer->avatar ?? Auth::user()->shop->details->logo) }}" class="rounded-circle shadow-sm" width="38" height="38" style="object-fit: cover;" alt="Avatar">
                             @else
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=ff5a36&color=fff" class="rounded-circle shadow-sm" width="38" height="38" alt="Avatar">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->customer->full_name ?? (Auth::user()->shop->name ?? Auth::user()->email)) }}&background=ff5a36&color=fff" class="rounded-circle shadow-sm" width="38" height="38" alt="Avatar">
                             @endif
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3">

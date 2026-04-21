@@ -3,6 +3,12 @@
 @section('title', 'Hồ sơ cá nhân')
 
 @section('content')
+@php
+    $userName = $user->customer->full_name ?? ($user->shop->name ?? $user->email);
+    $userPhone = $user->customer->phone ?? ($user->shop->details->phone ?? '');
+    $userAddress = $user->customer->addresses->where('is_default', 1)->first()->address_line ?? ($user->shop->details->address ?? '');
+    $userAvatar = $user->customer->avatar ?? ($user->shop->details->logo ?? null);
+@endphp
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
@@ -40,16 +46,16 @@
                 <div class="col-md-4">
                     <div class="card shadow-sm border-0 rounded-4 p-4 text-center">
                         <div class="mb-3 d-flex justify-content-center">
-                            @if($user->avatar)
-                                <img src="{{ asset($user->avatar) }}" class="rounded-circle shadow-sm" style="width: 150px; height: 150px; object-fit: cover;" alt="Avatar">
+                            @if($userAvatar)
+                                <img src="{{ asset($userAvatar) }}" class="rounded-circle shadow-sm" style="width: 150px; height: 150px; object-fit: cover;" alt="Avatar">
                             @else
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=ff5a36&color=fff&size=150" class="rounded-circle shadow-sm" alt="Avatar">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($userName) }}&background=ff5a36&color=fff&size=150" class="rounded-circle shadow-sm" alt="Avatar">
                             @endif
                         </div>
-                        <h5 class="mb-1">{{ $user->name }}</h5>
+                        <h5 class="mb-1">{{ $userName }}</h5>
                         <p class="text-muted mb-1">{{ $user->email }}</p>
-                        <p class="mb-1"><strong>SĐT:</strong> {{ $user->phone ?? '-' }}</p>
-                        <p><strong>Địa chỉ:</strong><br>{{ $user->address ?? '-' }}</p>
+                        <p class="mb-1"><strong>SĐT:</strong> {{ $userPhone ?: '-' }}</p>
+                        <p><strong>Địa chỉ:</strong><br>{{ $userAddress ?: '-' }}</p>
                     </div>
                 </div>
 
@@ -61,17 +67,17 @@
 
                             <div class="mb-3">
                                 <label class="form-label text-muted fw-medium">Họ và tên</label>
-                                <input type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
+                                <input type="text" name="name" class="form-control" value="{{ old('name', $userName) }}" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label text-muted fw-medium">Số điện thoại</label>
-                                <input type="text" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" placeholder="Ví dụ: 0912345678">
+                                <input type="text" name="phone" class="form-control" value="{{ old('phone', $userPhone) }}" placeholder="Ví dụ: 0912345678">
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label text-muted fw-medium">Địa chỉ</label>
-                                <textarea name="address" class="form-control" rows="3" placeholder="Nhập địa chỉ của bạn">{{ old('address', $user->address) }}</textarea>
+                                <textarea name="address" class="form-control" rows="3" placeholder="Nhập địa chỉ của bạn">{{ old('address', $userAddress) }}</textarea>
                             </div>
 
                             <div class="mb-4">

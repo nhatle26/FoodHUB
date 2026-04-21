@@ -11,15 +11,19 @@ class Shop extends Model
         'category_id',
         'name',
         'slug',
-        'phone',
-        'address',
-        'description',
-        'cover_image',
-        'logo',
-        'open_time',
-        'close_time',
         'status',
+        'reject_reason',
     ];
+
+    public function details()
+    {
+        return $this->hasOne(ShopDetail::class);
+    }
+
+    public function metrics()
+    {
+        return $this->hasOne(ShopMetric::class);
+    }
 
     public function user()
     {

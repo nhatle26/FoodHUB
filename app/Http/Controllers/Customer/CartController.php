@@ -109,18 +109,19 @@ class CartController extends Controller
                 'user_id'          => auth()->id(),
                 'shop_id'          => $cartItems->first()->shop_id,
                 'order_code'       => 'FH-' . now()->format('Ymd') . '-' . strtoupper(Str::random(5)),
-                'customer_name'    => auth()->user()->name,
-                'customer_phone'   => auth()->user()->phone ?? '0123456789',
-                'delivery_address' => $request->delivery_address ?? auth()->user()->address ?? 'Đà Nẵng',
-                'note'             => $request->note,
                 'subtotal'         => $subtotal,
-                'delivery_fee'     => 0,
-                'discount_amount'  => 0,
-                'total_amount'     => $subtotal,
+                'shipping_fee'     => 0,
+                'discount'         => 0,
+                'total'            => $subtotal,
                 'payment_method'   => $request->payment_method ?? 'cod',
-                'payment_status'   => 'pending',
                 'status'           => 'pending',
-                'ordered_at'       => now(),
+            ]);
+
+            \App\Models\OrderDelivery::create([
+                'order_id'         => $order->id,
+                'customer_phone'   => auth()->user()->customer->phone ?? '0123456789',
+                'delivery_address' => $request->delivery_address ?? (auth()->user()->customer->addresses->where('is_default', 1)->first()->address_line ?? 'Đà Nẵng'),
+                'note'             => $request->note,
             ]);
 
             foreach ($cartItems as $item) {
@@ -128,10 +129,9 @@ class CartController extends Controller
                     'order_id'     => $order->id,
                     'product_id'   => $item->product_id,
                     'product_name' => $item->product->name,
-                    'unit_price'   => $item->product->price,
+                    'product_price' => $item->product->price,
                     'quantity'     => $item->quantity,
-                    'line_total'   => $item->product->price * $item->quantity,
-                    'note'         => null,
+                    'subtotal'     => $item->product->price * $item->quantity,
                 ]);
             }
 
