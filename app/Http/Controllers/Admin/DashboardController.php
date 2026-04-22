@@ -20,7 +20,11 @@ class DashboardController extends Controller
         $orderCount = Schema::hasTable('orders') ? DB::table('orders')->count() : 0;
         $todayOrders = Schema::hasTable('orders') ? DB::table('orders')->whereDate('created_at', Carbon::today())->count() : 0;
         $pendingShopCount = Schema::hasTable('shops') ? DB::table('shops')->where('status', 'pending')->count() : 0;
-        $pendingShops = Schema::hasTable('shops') ? DB::table('shops')->where('status', 'pending')->limit(3)->get() : [];
+        $pendingShops = Schema::hasTable('shops') ? DB::table('shops')
+            ->leftJoin('shop_details', 'shops.id', '=', 'shop_details.shop_id')
+            ->where('shops.status', 'pending')
+            ->select('shops.id', 'shops.name', DB::raw("COALESCE(shop_details.address, '') as address"))
+            ->limit(3)->get() : [];
         $latestOrders = Schema::hasTable('orders') ? DB::table('orders')
             ->join('users', 'orders.user_id', '=', 'users.id')
             ->leftJoin('customers', 'users.id', '=', 'customers.user_id')

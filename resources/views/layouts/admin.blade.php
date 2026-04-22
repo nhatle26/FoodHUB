@@ -406,19 +406,22 @@
                 <a href="{{ route('admin.users.index') }}" class="nav-link-admin {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">👥 Quản lý Người dùng</a>
                 <a href="{{ route('admin.categories.index') }}" class="nav-link-admin {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">🗂 Quản lý Danh mục</a>
                 <a href="{{ route('admin.shops.pending') }}" class="nav-link-admin {{ request()->routeIs('admin.shops.*') ? 'active' : '' }}">🏪 Quản lý Shop</a>
-                <a href="#" class="nav-link-admin">🧾 Quản lý Đơn hàng</a>
-                <a href="#" class="nav-link-admin">📊 Báo cáo & Thống kê</a>
-                <a href="#" class="nav-link-admin">⚙️ Cài đặt</a>
+                <a href="{{ route('admin.orders.index') }}" class="nav-link-admin {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">🧾 Quản lý Đơn hàng</a>
+                <a href="{{ route('admin.orders.export') }}" class="nav-link-admin">📊 Xuất báo cáo CSV</a>
             </nav>
             <div style="margin-top:auto; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08);">
-                <div style="display:flex;align-items:center;gap:12px;">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
                     <div style="width:42px;height:42px;border-radius:50%;background:#2563eb;
-                        display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">A</div>
+                        display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">{{ strtoupper(substr(Auth::user()->email, 0, 1)) }}</div>
                     <div>
-                        <div style="font-weight:700;color:white;">Admin Quản trị</div>
-                        <div style="font-size:.85rem;color:#9ca3af;">admin@foodhub.vn</div>
+                        <div style="font-weight:700;color:white;">{{ Auth::user()->name ?? 'Admin' }}</div>
+                        <div style="font-size:.85rem;color:#9ca3af;">{{ Auth::user()->email }}</div>
                     </div>
                 </div>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" style="width:100%;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;border-radius:12px;padding:10px;font-weight:600;cursor:pointer;">🚪 Đăng xuất</button>
+                </form>
             </div>
         </aside>
 

@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
     @php
-        $checkoutCount = Auth::check()
-            ? (int) collect(session('checkout_order.items', []))->sum('quantity')
+        $cartCount = Auth::check()
+            ? \App\Models\Cart::where('user_id', Auth::id())->sum('quantity')
             : 0;
     @endphp
 
@@ -16,10 +16,10 @@
 
         <div class="collapse navbar-collapse" id="navbarMain">
             <div class="d-flex align-items-center gap-3 ms-auto mt-3 mt-lg-0">
-                <a href="{{ route('checkout.index') }}" class="position-relative text-dark text-decoration-none me-3">
+                <a href="{{ route('cart.index') }}" class="position-relative text-dark text-decoration-none me-3">
                     <i class="fas fa-shopping-cart fs-5"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-brand" style="font-size: 0.65rem;">
-                        {{ $checkoutCount }}
+                        {{ $cartCount }}
                     </span>
                 </a>
 

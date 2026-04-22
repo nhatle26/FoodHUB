@@ -16,8 +16,17 @@ class ShopManageController extends Controller
         }
 
         $pendingShops = DB::table('shops')
-            ->where('status', 'pending')
-            ->orderByDesc('created_at')
+            ->leftJoin('shop_details', 'shops.id', '=', 'shop_details.shop_id')
+            ->where('shops.status', 'pending')
+            ->select(
+                'shops.id',
+                'shops.name',
+                'shops.status',
+                'shops.created_at',
+                DB::raw("COALESCE(shop_details.address, '') as address"),
+                DB::raw("COALESCE(shop_details.phone, '') as phone")
+            )
+            ->orderByDesc('shops.created_at')
             ->paginate(12);
 
         return view('admin.shops.pending', compact('pendingShops'));

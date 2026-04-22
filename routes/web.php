@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ProfileController;
@@ -35,7 +34,7 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::prefix('shop')->name('shop.')->middleware('auth')->group(function () {
-    Route::get('/dashboard', [ShopDashboardController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard', [ShopController::class, 'dashboard'])->name('dashboard');
     Route::resource('products', ProductController::class);
     Route::resource('orders', OrderController::class);
     Route::resource('vouchers', VoucherController::class);
@@ -96,3 +95,37 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::post('/checkout/process', [CartController::class, 'processCheckout'])->name('checkout.process');
+
+// ========================================================
+// ROUTE TẠM THỜI - XÓA SAU KHI FIX XONG
+// Truy cập: http://127.0.0.1:8000/dev/fix-passwords
+// ========================================================
+Route::get('/dev/fix-passwords', function () {
+    $emails = [
+        'admin@foodhub.vn',
+        'hoa.tran@gmail.com',
+        'tuan.nguyen@gmail.com',
+        'mai.le@gmail.com',
+        'duc.pham@gmail.com',
+        'linh.nguyen@gmail.com',
+        'long.vo@gmail.com',
+    ];
+
+    $results = [];
+    foreach ($emails as $email) {
+        $user = \App\Models\User::where('email', $email)->first();
+        if (!$user) {
+            $results[] = "❌ NOT FOUND: $email";
+            continue;
+        }
+        $user->password = \Illuminate\Support\Facades\Hash::make('password');
+        $user->save();
+        $results[] = "✅ FIXED: $email | role={$user->role}";
+    }
+
+    return response('<pre style="font-family:monospace;padding:20px">'
+        . '<h2>FoodHub - Fix Passwords</h2>'
+        . implode("\n", $results)
+        . "\n\n<b>Mật khẩu tất cả tài khoản trên đã được reset về: <code>password</code></b>"
+        . '</pre>');
+});
