@@ -1,4 +1,4 @@
-﻿@extends('layouts.authShop')
+@extends('layouts.authShop')
 
 @section('title')
     Đăng ký mở shop
@@ -72,6 +72,30 @@
                                 </span>
                                 <input type="text" name="phone" id="phone" value="{{ old('phone') }}"
                                     class="form-control rounded-4 py-2 input-with-icon" placeholder="0901234567">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column flex-md-row gap-3 inline-fields mb-3">
+                        <div class="w-100">
+                            <label class="form-label fw-semibold">Email đăng nhập</label>
+                            <div class="input-icon-field">
+                                <span class="input-icon">
+                                    <svg viewBox="0 0 16 16" class="icon-svg" aria-hidden="true"><path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555ZM0 4.697v7.104l5.803-3.558L0 4.697ZM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757Zm3.436-.586L16 11.801V4.697l-5.803 3.546Z"/></svg>
+                                </span>
+                                <input type="email" name="email" id="email" value="{{ old('email') }}"
+                                    class="form-control rounded-4 py-2 input-with-icon" placeholder="admin@shop.com">
+                            </div>
+                        </div>
+
+                        <div class="w-100">
+                            <label class="form-label fw-semibold">Mật khẩu</label>
+                            <div class="input-icon-field">
+                                <span class="input-icon">
+                                    <svg viewBox="0 0 16 16" class="icon-svg" aria-hidden="true"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
+                                </span>
+                                <input type="password" name="password" id="password"
+                                    class="form-control rounded-4 py-2 input-with-icon" placeholder="Tối thiểu 8 ký tự">
                             </div>
                         </div>
                     </div>
@@ -192,10 +216,12 @@
         function nextStep() {
             const name = document.getElementById('name').value.trim();
             const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
             const address = document.getElementById('address').value.trim();
             const category = document.querySelector('input[name="category_id"]:checked');
 
-            if (!name || !phone || !address || !category) {
+            if (!name || !phone || !email || !password || !address || !category) {
                 alert('Vui lòng nhập đầy đủ thông tin ở bước 1');
                 return;
             }

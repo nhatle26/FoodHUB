@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Shop;
 use App\Models\Voucher;
 use App\Services\VoucherService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class VoucherController extends Controller
 {
@@ -41,7 +41,7 @@ class VoucherController extends Controller
     {
         $validated = $request->validate([
             'shop_id' => ['required', 'integer', 'exists:shops,id'],
-            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'user_id' => ['nullable', 'integer', 'exists:users,id'],
             'voucher_code' => ['required', 'string', 'max:30'],
             'shipping_fee' => ['nullable', 'integer', 'min:0'],
             'items' => ['required', 'array', 'min:1'],
@@ -52,7 +52,15 @@ class VoucherController extends Controller
             'context.is_student_verified' => ['nullable', 'boolean'],
         ]);
 
-        $cart = $this->voucherService->buildCartSummary(
+        $userId = auth()->id() ?? (int) ($validated['user_id'] ?? 0);
+
+        if ($userId === 0) {
+            throw ValidationException::withMessages([
+                'user_id' => 'Can dang nhap de xem truoc voucher.',
+            ]);
+        }
+
+        $orderDraft = $this->voucherService->buildCartSummary(
             (int) $validated['shop_id'],
             $validated['items']
         );
@@ -60,8 +68,8 @@ class VoucherController extends Controller
         $quote = $this->voucherService->preview(
             $validated['voucher_code'],
             (int) $validated['shop_id'],
-            (int) $validated['user_id'],
-            $cart,
+            $userId,
+            $orderDraft,
             (int) ($validated['shipping_fee'] ?? 15000),
             $validated['context'] ?? []
         );

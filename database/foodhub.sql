@@ -211,6 +211,7 @@ CREATE TABLE `order_items` (
   `order_id`      BIGINT UNSIGNED NOT NULL,
   `product_id`    BIGINT UNSIGNED NOT NULL,
   `product_name`  VARCHAR(150)    NOT NULL,
+  `product_group` VARCHAR(100)    DEFAULT NULL,
   `product_price` DECIMAL(10,0)   NOT NULL,
   `quantity`      INT UNSIGNED    NOT NULL,
   `subtotal`      DECIMAL(12,0)   NOT NULL,
@@ -587,5 +588,10 @@ INSERT INTO `wishlists` (`user_id`, `shop_id`) VALUES
 (15, 7), (16, 5),
 (17, 11), (18, 1),
 (19, 7), (20, 5), (20, 11);
+
+UPDATE `order_items` oi
+JOIN `products` p ON p.`id` = oi.`product_id`
+SET oi.`product_group` = p.`product_group`
+WHERE oi.`product_group` IS NULL;
 
 SET FOREIGN_KEY_CHECKS = 1;

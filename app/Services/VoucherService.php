@@ -50,6 +50,7 @@ class VoucherService
             return [
                 'product_id' => $product->id,
                 'product_name' => $product->name,
+                'product_image' => $product->image,
                 'product_price' => (int) $product->price,
                 'product_group' => $product->product_group,
                 'quantity' => $item['quantity'],

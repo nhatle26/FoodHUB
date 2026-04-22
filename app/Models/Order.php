@@ -12,6 +12,7 @@ class Order extends Model
         'order_code',
         'user_id',
         'shop_id',
+        'order_code',
         'subtotal',
         'shipping_fee',
         'discount',
@@ -25,6 +26,7 @@ class Order extends Model
         'confirmed_at',
         'delivered_at',
         'cancel_reason',
+        'voucher_code',
     ];
 
     protected $casts = [

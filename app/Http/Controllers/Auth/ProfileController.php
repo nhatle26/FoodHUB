@@ -19,7 +19,7 @@ class ProfileController extends Controller
 
     public function show()
     {
-        return view('Auth.profile', ['user' => Auth::user()]);
+        return view('profile', ['user' => Auth::user()]);
     }
 
     public function updateInfo(Request $request)
@@ -33,22 +33,54 @@ class ProfileController extends Controller
             'avatar' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
+        $avatarPath = null;
         if ($request->hasFile('avatar')) {
-            if ($user->avatar && File::exists(public_path($user->avatar))) {
-                File::delete(public_path($user->avatar));
-            }
-
             $avatarFile = $request->file('avatar');
-            $avatarName = time() . '_' . Str::slug($user->name ?? 'avatar') . '.' . $avatarFile->getClientOriginalExtension();
+            $avatarName = time() . '_' . Str::slug($request->name ?? 'avatar') . '.' . $avatarFile->getClientOriginalExtension();
             File::ensureDirectoryExists(public_path('uploads/avatars'));
             $avatarFile->move(public_path('uploads/avatars'), $avatarName);
-            $user->avatar = 'uploads/avatars/' . $avatarName;
+            $avatarPath = 'uploads/avatars/' . $avatarName;
         }
 
-        $user->name = $request->name;
-        $user->phone = $request->phone;
-        $user->address = $request->address;
-        $user->save();
+        if ($user->role === 'customer') {
+            $customer = $user->customer ?? new \App\Models\Customer(['user_id' => $user->id]);
+            if ($avatarPath) {
+                if ($customer->avatar && File::exists(public_path($customer->avatar))) {
+                    File::delete(public_path($customer->avatar));
+                }
+                $customer->avatar = $avatarPath;
+            }
+            $customer->full_name = $request->name;
+            $customer->phone = $request->phone;
+            $customer->save();
+
+            if ($request->address) {
+                \App\Models\CustomerAddress::updateOrCreate(
+                    ['user_id' => $user->id, 'is_default' => 1],
+                    ['phone_number' => $request->phone ?? '', 'address_line' => $request->address]
+                );
+            }
+        } elseif ($user->role === 'shop') {
+            $shop = $user->shop;
+            if ($shop) {
+                $shop->name = $request->name;
+                $shop->save();
+
+                $details = $shop->details ?? new \App\Models\ShopDetail(['shop_id' => $shop->id]);
+                if ($avatarPath) {
+                    if ($details->logo && File::exists(public_path($details->logo))) {
+                        File::delete(public_path($details->logo));
+                    }
+                    $details->logo = $avatarPath;
+                }
+                $details->phone = $request->phone;
+                $details->address = $request->address;
+                $details->save();
+            }
+        } elseif ($user->role === 'admin') {
+            // Admin might not have a specific profile table in this schema
+            // We just ignore the profile update or add an admins table if needed.
+        }
 
         return back()->with('success_info', 'Thông tin cá nhân đã được cập nhật.');
     }

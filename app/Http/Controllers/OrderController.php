@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\VoucherService;
@@ -10,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
@@ -20,7 +20,7 @@ class OrderController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'user_id' => ['nullable', 'integer', 'exists:users,id'],
             'shop_id' => ['required', 'integer', 'exists:shops,id'],
             'delivery_address' => ['required', 'string'],
             'customer_phone' => ['required', 'string', 'max:15'],
@@ -36,7 +36,15 @@ class OrderController extends Controller
             'context.is_student_verified' => ['nullable', 'boolean'],
         ]);
 
-        $cart = $this->voucherService->buildCartSummary(
+        $userId = auth()->id() ?? (int) ($validated['user_id'] ?? 0);
+
+        if ($userId === 0) {
+            throw ValidationException::withMessages([
+                'user_id' => 'Can dang nhap de tao don hang.',
+            ]);
+        }
+
+        $orderDraft = $this->voucherService->buildCartSummary(
             (int) $validated['shop_id'],
             $validated['items']
         );
@@ -48,22 +56,22 @@ class OrderController extends Controller
             $quote = $this->voucherService->preview(
                 $validated['voucher_code'],
                 (int) $validated['shop_id'],
-                (int) $validated['user_id'],
-                $cart,
+                $userId,
+                $orderDraft,
                 $shippingFee,
                 $validated['context'] ?? []
             );
         }
 
-        $order = DB::transaction(function () use ($validated, $cart, $quote, $shippingFee) {
+        $order = DB::transaction(function () use ($validated, $orderDraft, $quote, $shippingFee, $userId) {
             $order = Order::create([
                 'order_code' => $this->generateOrderCode(),
-                'user_id' => (int) $validated['user_id'],
+                'user_id' => $userId,
                 'shop_id' => (int) $validated['shop_id'],
-                'subtotal' => (int) $cart['subtotal'],
+                'subtotal' => (int) $orderDraft['subtotal'],
                 'shipping_fee' => $shippingFee,
                 'discount' => (int) ($quote['discount'] ?? 0),
-                'total' => (int) ($quote['total'] ?? ((int) $cart['subtotal'] + $shippingFee)),
+                'total' => (int) ($quote['total'] ?? ((int) $orderDraft['subtotal'] + $shippingFee)),
                 'delivery_address' => $validated['delivery_address'],
                 'customer_phone' => $validated['customer_phone'],
                 'note' => $validated['note'] ?? null,
@@ -72,11 +80,12 @@ class OrderController extends Controller
                 'status' => 'pending',
             ]);
 
-            foreach ($cart['items'] as $item) {
+            foreach ($orderDraft['items'] as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
                     'product_name' => $item['product_name'],
+                    'product_group' => $item['product_group'] ?? null,
                     'product_price' => $item['product_price'],
                     'quantity' => $item['quantity'],
                     'subtotal' => $item['subtotal'],
@@ -91,7 +100,7 @@ class OrderController extends Controller
         });
 
         return response()->json([
-            'message' => 'Tạo đơn hàng thành công.',
+            'message' => 'Tao don hang thanh cong.',
             'data' => [
                 'order' => $order,
                 'voucher' => $quote['voucher_data'] ?? null,
@@ -102,7 +111,7 @@ class OrderController extends Controller
     protected function generateOrderCode(): string
     {
         do {
-            $code = 'FH-'.now()->format('ymd').'-'.Str::upper(Str::random(6));
+            $code = 'FH-' . now()->format('ymd') . '-' . Str::upper(Str::random(6));
         } while (Order::query()->where('order_code', $code)->exists());
 
         return $code;

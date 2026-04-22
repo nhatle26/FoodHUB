@@ -207,6 +207,7 @@ class VoucherFlowTest extends TestCase
 
         $this->assertDatabaseHas('order_items', [
             'product_id' => $product->id,
+            'product_group' => 'Combo',
             'quantity' => 2,
             'subtotal' => 120000,
         ]);

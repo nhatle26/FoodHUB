@@ -1,47 +1,40 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Customer\CheckoutController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrderController as WebOrderController;
+use App\Http\Controllers\Shop\OrderController as ShopOrderController;
+use App\Http\Controllers\Shop\ProductController;
+use App\Http\Controllers\Shop\ShopController as ShopDashboardController;
+use App\Http\Controllers\ShopController;
+use App\Http\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\Admin\CategoryController;
 
-// Group các route liên quan đến Auth
 Route::prefix('auth')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login'])->name('login.post');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
     Route::get('/user-register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/user-register', [RegisterController::class, 'register'])->name('register.post');
+
     Route::get('/shop-register', [RegisterController::class, 'create'])->name('shop.create');
-Route::post('/shop-register', [RegisterController::class, 'store'])->name('shop.store');
+    Route::post('/shop-register', [RegisterController::class, 'store'])->name('shop.store');
 });
-// // Địa chỉ "cứu viện"
-// Route::get('/cuu-beng', function () {
-//     try {
-//         // 1. Dọn sạch data cũ (Nếu có)
-//         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-//         DB::table('users')->truncate();
-//         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-//         // 2. Ép chèn 1 User tên là "Bèng FoodHub" vào database
-//         DB::table('users')->insert([
-//             'name' => 'Bèng FoodHub',
-//             'email' => 'beng.super@example.com',
-//             'password' => bcrypt('beng123'), // Mật khẩu là beng123
-//             'created_at' => now(),
-//             'updated_at' => now(),
-//         ]);
+Route::prefix('shop')->name('shop.')->middleware('auth')->group(function () {
+    Route::get('/dashboard', [ShopDashboardController::class, 'dashboard'])->name('dashboard');
+    Route::resource('products', ProductController::class);
+    Route::resource('orders', ShopOrderController::class);
+    Route::get('/revenue', [ShopDashboardController::class, 'revenue'])->name('revenue');
+    Route::get('/settings', [ShopDashboardController::class, 'settings'])->name('settings');
+});
 
-//         return "TUYỆT VỜI! Đã tạo xong User 'Bèng FoodHub'. Bèng mở Workbench lên và NHẤN REFRESH NGAY!";
-//     } catch (\Exception $e) {
-//         return "Vẫn còn lỗi: " . $e->getMessage();
-//     }
-// });
-
-// Admin CRUD Routes
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('shops/pending', [AdminController::class, 'pendingShops'])->name('shops.pending');
@@ -56,6 +49,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
     Route::post('/profile', [ProfileController::class, 'updateInfo'])->name('profile.update');
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/prepare', [CheckoutController::class, 'prepare'])->name('checkout.prepare');
+    Route::patch('/checkout/items/{productId}', [CheckoutController::class, 'updateQuantity'])->name('checkout.items.update');
+    Route::delete('/checkout/items/{productId}', [CheckoutController::class, 'remove'])->name('checkout.items.remove');
+    Route::post('/checkout/process', [CheckoutController::class, 'processCheckout'])->name('checkout.process');
+
+    Route::post('/vouchers/preview', [VoucherController::class, 'preview'])->name('vouchers.preview');
+    Route::post('/orders', [WebOrderController::class, 'store'])->name('orders.store');
 });
 
-
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/shop/{id}', [ShopController::class, 'show'])->name('shop.show');
+Route::get('/shops/{shop}/vouchers', [VoucherController::class, 'index'])->name('shops.vouchers.index');

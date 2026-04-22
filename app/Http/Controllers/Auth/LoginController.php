@@ -24,11 +24,29 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials, $request->remember)) {
             $request->session()->regenerate();
-            return redirect()->intended('dashboard'); // Chuyển hướng sau khi thành công
+            
+            $role = Auth::user()->role ?? 'customer';
+            
+            if ($role === 'admin') {
+                return redirect()->intended('/admin');
+            } elseif ($role === 'shop') {
+                return redirect()->intended('/shop/dashboard');
+            }
+            
+            return redirect()->intended('/');
         }
 
         return back()->withErrors([
             'email' => 'Thông tin đăng nhập không chính xác.',
         ])->onlyInput('email');
+    }
+
+    // Xử lý đăng xuất
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/');
     }
 }

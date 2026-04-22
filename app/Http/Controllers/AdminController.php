@@ -22,13 +22,14 @@ class AdminController extends Controller
         $pendingShops = Schema::hasTable('shops') ? DB::table('shops')->where('status', 'pending')->limit(3)->get() : [];
         $latestOrders = Schema::hasTable('orders') ? DB::table('orders')
             ->join('users', 'orders.user_id', '=', 'users.id')
+            ->leftJoin('customers', 'users.id', '=', 'customers.user_id')
             ->join('shops', 'orders.shop_id', '=', 'shops.id')
             ->select(
                 'orders.order_code',
                 'orders.total',
                 'orders.status',
                 'orders.created_at',
-                'users.name as customer_name',
+                DB::raw('COALESCE(customers.full_name, users.email) as customer_name'),
                 'shops.name as shop_name'
             )
             ->orderByDesc('orders.created_at')
@@ -121,14 +122,49 @@ class AdminController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $validated['password'] = bcrypt($validated['password']);
-        $validated['is_active'] = $request->has('is_active');
+        $userData = [
+            'email' => $validated['email'],
+            'password' => bcrypt($validated['password']),
+            'role' => $validated['role'],
+            'is_active' => $request->has('is_active'),
+        ];
 
         try {
-            User::create($validated);
+            DB::beginTransaction();
+            $user = User::create($userData);
+            
+            if ($validated['role'] === 'customer') {
+                \App\Models\Customer::create([
+                    'user_id' => $user->id,
+                    'full_name' => $validated['name'],
+                    'phone' => $validated['phone'] ?? null,
+                ]);
+                if (!empty($validated['address'])) {
+                    \App\Models\CustomerAddress::create([
+                        'user_id' => $user->id,
+                        'address_line' => $validated['address'],
+                        'is_default' => 1,
+                    ]);
+                }
+            } elseif ($validated['role'] === 'shop') {
+                $shop = \App\Models\Shop::create([
+                    'user_id' => $user->id,
+                    'category_id' => \App\Models\Category::first()->id ?? 1,
+                    'name' => $validated['name'],
+                    'slug' => \Illuminate\Support\Str::slug($validated['name']),
+                    'status' => 'active',
+                ]);
+                \App\Models\ShopDetail::create([
+                    'shop_id' => $shop->id,
+                    'phone' => $validated['phone'] ?? null,
+                    'address' => $validated['address'] ?? null,
+                ]);
+            }
+            DB::commit();
             return redirect()->route('admin.users.index')
                 ->with('success', 'Tạo user thành công!');
         } catch (\Exception $e) {
+            DB::rollBack();
             return back()
                 ->with('error', 'Lỗi: ' . $e->getMessage())
                 ->withInput();
@@ -157,21 +193,50 @@ class AdminController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        // Nếu có password mới, validate và update
+        $userData = [
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'is_active' => $request->has('is_active'),
+        ];
+
         if ($request->filled('password')) {
-            $request->validate([
-                'password' => 'required|string|min:8|confirmed',
-            ]);
-            $validated['password'] = bcrypt($request->password);
+            $request->validate(['password' => 'required|string|min:8|confirmed']);
+            $userData['password'] = bcrypt($request->password);
         }
 
-        $validated['is_active'] = $request->has('is_active');
-
         try {
-            $user->update($validated);
+            DB::beginTransaction();
+            $user->update($userData);
+            
+            if ($validated['role'] === 'customer') {
+                $customer = $user->customer ?? new \App\Models\Customer(['user_id' => $user->id]);
+                $customer->full_name = $validated['name'];
+                $customer->phone = $validated['phone'] ?? null;
+                $customer->save();
+                
+                if (!empty($validated['address'])) {
+                    \App\Models\CustomerAddress::updateOrCreate(
+                        ['user_id' => $user->id, 'is_default' => 1],
+                        ['address_line' => $validated['address']]
+                    );
+                }
+            } elseif ($validated['role'] === 'shop') {
+                $shop = $user->shop;
+                if ($shop) {
+                    $shop->name = $validated['name'];
+                    $shop->save();
+                    
+                    $details = $shop->details ?? new \App\Models\ShopDetail(['shop_id' => $shop->id]);
+                    $details->phone = $validated['phone'] ?? null;
+                    $details->address = $validated['address'] ?? null;
+                    $details->save();
+                }
+            }
+            DB::commit();
             return redirect()->route('admin.users.index')
                 ->with('success', 'Cập nhật user thành công!');
         } catch (\Exception $e) {
+            DB::rollBack();
             return back()
                 ->with('error', 'Lỗi: ' . $e->getMessage());
         }

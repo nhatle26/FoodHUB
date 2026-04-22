@@ -13,14 +13,8 @@ class Shop extends Model
         'category_id',
         'name',
         'slug',
-        'phone',
-        'address',
-        'description',
-        'cover_image',
-        'logo',
-        'open_time',
-        'close_time',
         'status',
+        'reject_reason',
     ];
 
     protected $casts = [
@@ -34,7 +28,22 @@ class Shop extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function products(): HasMany
+    public function details()
+    {
+        return $this->hasOne(ShopDetail::class);
+    }
+
+    public function metrics()
+    {
+        return $this->hasOne(ShopMetric::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function products()
     {
         return $this->hasMany(Product::class);
     }
@@ -44,7 +53,7 @@ class Shop extends Model
         return $this->hasMany(Voucher::class);
     }
 
-    public function orders(): HasMany
+    public function orders()
     {
         return $this->hasMany(Order::class);
     }
