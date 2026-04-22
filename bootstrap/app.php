@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\CheckIfAdmin;
+use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\RoleRedirect;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,9 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'check.role' => \App\Http\Middleware\CheckRole::class,
-            'admin' => \App\Http\Middleware\CheckIfAdmin::class,
-            'role.redirect' => \App\Http\Middleware\RoleRedirect::class,
+            'check.role' => CheckRole::class,
+            'admin' => CheckIfAdmin::class,
+            'role.redirect' => RoleRedirect::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

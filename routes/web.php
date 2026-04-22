@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -20,21 +22,20 @@ use App\Http\Controllers\Shop\ProductController;
 use App\Http\Controllers\Shop\OrderController;
 use App\Http\Controllers\Shop\VoucherController;
 use App\Http\Controllers\Shop\SettingController;
-
-// Group các route liên quan đến Auth
 Route::prefix('auth')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login'])->name('login.post');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
     Route::get('/user-register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/user-register', [RegisterController::class, 'register'])->name('register.post');
+
     Route::get('/shop-register', [RegisterController::class, 'create'])->name('shop.create');
-Route::post('/shop-register', [RegisterController::class, 'store'])->name('shop.store');
+    Route::post('/shop-register', [RegisterController::class, 'store'])->name('shop.store');
 });
 
-// Shop Routes
 Route::prefix('shop')->name('shop.')->middleware('auth')->group(function () {
-    Route::get('/dashboard', [ShopController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard', [ShopDashboardController::class, 'dashboard'])->name('dashboard');
     Route::resource('products', ProductController::class);
     Route::resource('orders', OrderController::class);
     Route::resource('vouchers', VoucherController::class);
@@ -44,30 +45,6 @@ Route::prefix('shop')->name('shop.')->middleware('auth')->group(function () {
     Route::post('/settings/toggle-status', [SettingController::class, 'toggleStatus'])->name('settings.toggle_status');
 });
 
-// Địa chỉ "cứu viện"
-// Route::get('/cuu-beng', function () {
-//     try {
-//         // 1. Dọn sạch data cũ (Nếu có)
-//         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-//         DB::table('users')->truncate();
-//         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
-//         // 2. Ép chèn 1 User tên là "Bèng FoodHub" vào database
-//         DB::table('users')->insert([
-//             'name' => 'Bèng FoodHub',
-//             'email' => 'beng.super@example.com',
-//             'password' => bcrypt('beng123'), // Mật khẩu là beng123
-//             'created_at' => now(),
-//             'updated_at' => now(),
-//         ]);
-
-//         return "TUYỆT VỜI! Đã tạo xong User 'Bèng FoodHub'. Bèng mở Workbench lên và NHẤN REFRESH NGAY!";
-//     } catch (\Exception $e) {
-//         return "Vẫn còn lỗi: " . $e->getMessage();
-//     }
-// });
-
-// Admin CRUD Routes
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('shops/pending', [ShopManageController::class, 'pendingShops'])->name('shops.pending');
@@ -85,6 +62,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
     Route::post('/profile', [ProfileController::class, 'updateInfo'])->name('profile.update');
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    Route::post('/vouchers/preview', [\App\Http\Controllers\VoucherController::class, 'preview'])->name('vouchers.preview');
+    Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store'])->name('orders.store');
 });
 
 // Route chính cho trang chủ
@@ -92,21 +72,14 @@ Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('ho
 
 // Route chi tiết quán ăn
 Route::get('/shop/{id}', [App\Http\Controllers\FrontShopController::class, 'show'])->name('shop.show');
+Route::get('/shops/{shop}/vouchers', [\App\Http\Controllers\VoucherController::class, 'index'])->name('shops.vouchers.index');
 
 Route::middleware(['auth'])->group(function () {
     // Trang danh sách giỏ hàng
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-
-    // Thêm món (dùng POST)
     Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.add');
-
-    // Cập nhật số lượng
     Route::patch('/cart/update/{id}', [CartController::class, 'updateQuantity'])->name('cart.update');
-
-    // Xóa từng món
     Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
-
-    // Xóa sạch giỏ
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
     // Customer Orders
@@ -121,7 +94,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('customer.wishlist.index');
     Route::post('/wishlist/toggle/{shop}', [WishlistController::class, 'toggle'])->name('customer.wishlist.toggle');
 });
-
-Route::get('/checkout', [CartController::class, 'index'])->name('cart.index');
 
 Route::post('/checkout/process', [CartController::class, 'processCheckout'])->name('checkout.process');

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use Carbon\Carbon;
 
 class OrderSeeder extends Seeder
@@ -381,7 +382,14 @@ class OrderSeeder extends Seeder
 
             foreach ($items as $item) {
                 if ($item['quantity'] > 0) {
-                    OrderItem::create(array_merge($item, ['order_id' => $order->id]));
+                    $productGroup = Product::query()
+                        ->whereKey($item['product_id'])
+                        ->value('product_group');
+
+                    OrderItem::create(array_merge($item, [
+                        'order_id' => $order->id,
+                        'product_group' => $productGroup,
+                    ]));
                 }
             }
         }

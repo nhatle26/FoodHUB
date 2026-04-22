@@ -7,29 +7,25 @@
 @endsection
 
 @section('content')
-<!-- Mũi tên quay lại hẹp theo yều cầu -->
 <div class="shop-header-bar">
     <a href="{{ route('home') }}" class="back-btn"><i class="fas fa-arrow-left"></i></a>
     <h1 class="shop-title-nav">{{ $shopData['name'] }}</h1>
 </div>
 
-<!-- Hero Banner Mở Rộng -->
 <div class="shop-hero" style="background-image: url('{{ $shopData['banner'] }}');">
-    <!-- Ảnh inset Logo góc trái dưới -->
     <div class="shop-hero-inset">
         <img src="{{ $shopData['logo'] }}" alt="Logo {{ $shopData['name'] }}">
     </div>
 </div>
 
-<!-- Khối thông tin chi tiết -->
 <div class="shop-info-block">
     <h1 class="shop-info-title">{{ $shopData['name'] }}</h1>
     <div class="status-badge">{{ $shopData['status'] }}</div>
-    
+
     <div class="info-row">
         <div class="info-item">
             <i class="fas fa-star icon-rating"></i>
-            <span><strong>{{ $shopData['rating'] }}</strong> ({{ number_format($shopData['reviews_count']) }} đánh giá)</span>
+            <span><strong>{{ $shopData['rating'] }}</strong> ({{ number_format($shopData['reviews_count']) }} danh gia)</span>
         </div>
         <div class="info-item">
             <i class="fas fa-utensils text-muted"></i>
@@ -46,16 +42,13 @@
     </div>
 </div>
 
-<!-- Bố cục Nội dung Chính -->
 <div class="shop-layout">
-    
-    <!-- Cột trái: Navigation -->
     <aside class="category-sidebar">
         <div class="category-menu-card">
-            <h4 class="category-menu-title">Danh mục</h4>
+            <h4 class="category-menu-title">Danh muc</h4>
             <div class="d-flex flex-column">
                 @php $first = true; @endphp
-                @foreach(array_keys($menuCategories) as $catName)
+                @foreach (array_keys($menuCategories) as $catName)
                     <a href="#cat-{{ Str::slug($catName) }}" class="menu-link {{ $first ? 'active' : '' }}">{{ $catName }}</a>
                     @php $first = false; @endphp
                 @endforeach
@@ -63,178 +56,174 @@
         </div>
     </aside>
 
-    <!-- Cột phải: Content Layout -->
     <main class="content-area">
-        
-        <!-- Cột danh sách món (Bên trái của phần body) -->
         <div class="food-list-container">
-            @foreach($menuCategories as $catName => $items)
+            @foreach ($menuCategories as $catName => $items)
                 <h3 class="section-title" id="cat-{{ Str::slug($catName) }}">{{ $catName }}</h3>
-                
-                @if(count($items) > 0)
-                    @foreach($items as $item)
+
+                @if (count($items) > 0)
+                    @foreach ($items as $item)
                         <div class="food-card">
                             <img src="{{ $item['image'] }}" class="food-img" alt="{{ $item['name'] }}">
                             <div class="food-details">
                                 <h5 class="food-name">{{ $item['name'] }}</h5>
                                 <p class="food-desc">{{ $item['description'] }}</p>
                                 <div class="food-bottom">
-                                    <span class="food-price">{{ number_format($item['price']) }}đ</span>
-                                    <button class="btn-add-cart" onclick="addToCart({{ $item['id'] }}, '{{ addslashes($item['name']) }}', {{ $item['price'] }})">+ Thêm vào giỏ</button>
+                                    <span class="food-price">{{ number_format($item['price']) }}d</span>
+                                    <button class="btn-add-cart" onclick="addToDraft({{ $item['id'] }}, '{{ addslashes($item['name']) }}', {{ $item['price'] }})">
+                                        + Them vao don
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     @endforeach
                 @else
-                    <p class="text-muted fst-italic">Đang cập nhật món mới...</p>
+                    <p class="text-muted fst-italic">Dang cap nhat mon moi...</p>
                 @endif
             @endforeach
         </div>
 
-        <!-- Floating Cart (Bên phải của phần body) -->
         <div class="cart-container-wrap">
             <div class="floating-cart">
                 <h4 class="cart-title">
-                    <i class="fas fa-shopping-basket text-brand"></i> Giỏ hàng
+                    <i class="fas fa-receipt text-brand"></i> Don tam
                 </h4>
-                
-                <div class="cart-items">
-                    <!-- Javascript sẽ render giỏ hàng tại đây -->
-                </div>
+
+                <div class="cart-items"></div>
 
                 <hr class="cart-divider">
 
                 <div class="cart-total">
-                    <span class="text-muted fw-semibold">Tạm tính:</span>
-                    <span class="cart-total-value">0đ</span>
+                    <span class="text-muted fw-semibold">Tam tinh:</span>
+                    <span class="cart-total-value">0d</span>
                 </div>
 
-                <button class="btn btn-checkout" onclick="processLocalCheckout()">Đặt hàng</button>
-
+                <button class="btn btn-checkout" onclick="goToCheckout()">Thanh toan</button>
             </div>
         </div>
-
     </main>
 </div>
 @endsection
 
 @section('scripts')
 <script>
-    let cart = {};
+    let orderDraft = {};
 
-    function addToCart(id, name, price) {
-        if (cart[id]) {
-            cart[id].qty += 1;
+    function addToDraft(id, name, price) {
+        if (orderDraft[id]) {
+            orderDraft[id].qty += 1;
         } else {
-            cart[id] = { name: name, price: parseFloat(price), qty: 1 };
+            orderDraft[id] = { name, price: parseFloat(price), qty: 1 };
         }
-        renderCart();
+
+        renderDraft();
     }
 
-    function updateQty(id, delta) {
-        if (cart[id]) {
-            cart[id].qty += delta;
-            if (cart[id].qty <= 0) {
-                delete cart[id];
-            }
+    function updateDraftQty(id, delta) {
+        if (!orderDraft[id]) {
+            return;
         }
-        renderCart();
+
+        orderDraft[id].qty += delta;
+
+        if (orderDraft[id].qty <= 0) {
+            delete orderDraft[id];
+        }
+
+        renderDraft();
     }
 
-    function renderCart() {
-        const cartItemsContainer = document.querySelector('.cart-items');
-        const cartTotalEl = document.querySelector('.cart-total-value');
-        
-        cartItemsContainer.innerHTML = '';
+    function renderDraft() {
+        const itemsContainer = document.querySelector('.cart-items');
+        const totalEl = document.querySelector('.cart-total-value');
+
+        itemsContainer.innerHTML = '';
         let total = 0;
         let hasItems = false;
 
-        for (let id in cart) {
+        Object.entries(orderDraft).forEach(([id, item]) => {
             hasItems = true;
-            let item = cart[id];
-            let itemTotal = item.price * item.qty;
-            total += itemTotal;
+            const lineTotal = item.price * item.qty;
+            total += lineTotal;
 
-            cartItemsContainer.innerHTML += `
+            itemsContainer.innerHTML += `
                 <div class="cart-item">
                     <div class="cart-item-info">
                         <div class="cart-item-name">${item.name}</div>
                         <div class="cart-qty-ctrl">
-                            <button class="qty-btn" onclick="updateQty('${id}', -1)">–</button>
+                            <button class="qty-btn" onclick="updateDraftQty('${id}', -1)">-</button>
                             <span>${item.qty}</span>
-                            <button class="qty-btn" onclick="updateQty('${id}', 1)">+</button>
+                            <button class="qty-btn" onclick="updateDraftQty('${id}', 1)">+</button>
                         </div>
                     </div>
-                    <div class="cart-item-price">${new Intl.NumberFormat('vi-VN').format(itemTotal)}đ</div>
+                    <div class="cart-item-price">${new Intl.NumberFormat('vi-VN').format(lineTotal)}d</div>
                 </div>
             `;
-        }
+        });
 
         if (!hasItems) {
-            cartItemsContainer.innerHTML = '<p class="text-muted fst-italic">Giỏ hàng trống</p>';
-            cartTotalEl.innerText = '0đ';
-        } else {
-            cartTotalEl.innerText = new Intl.NumberFormat('vi-VN').format(total) + 'đ';
+            itemsContainer.innerHTML = '<p class="text-muted fst-italic">Don tam dang trong</p>';
+            totalEl.innerText = '0d';
+            return;
         }
+
+        totalEl.innerText = `${new Intl.NumberFormat('vi-VN').format(total)}d`;
     }
 
-    async function processLocalCheckout() {
+    async function goToCheckout() {
         const isAuth = {{ Auth::check() ? 'true' : 'false' }};
+
         if (!isAuth) {
-            alert('Bạn cần đăng nhập để đặt hàng!');
+            alert('Ban can dang nhap de dat hang!');
             window.location.href = "{{ route('login') }}";
             return;
         }
 
-        if (Object.keys(cart).length === 0) {
-            return alert('Giỏ hàng của bạn đang trống!');
+        if (Object.keys(orderDraft).length === 0) {
+            alert('Don tam cua ban dang trong!');
+            return;
         }
-        
-        let btn = document.querySelector('.btn-checkout');
-        let originalText = btn.innerText;
-        btn.innerText = 'Đang xử lý...';
-        btn.disabled = true;
 
-        for (let id in cart) {
-            let item = cart[id];
-            try {
-                let res = await fetch("{{ route('cart.add') }}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        "Accept": "application/json"
-                    },
-                    body: JSON.stringify({
-                        product_id: parseInt(id),
-                        quantity: item.qty
-                    })
-                });
-                
-                let data = await res.json();
-                
-                if (data.status === 'error') {
-                    alert(data.message);
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                    return; // Fail on current shop overlapping
-                }
-            } catch(e) {
-                console.error(e);
-                alert("Đã xảy ra lỗi máy chủ! Xin thử lại.");
-                btn.innerText = originalText;
-                btn.disabled = false;
-                return;
+        const button = document.querySelector('.btn-checkout');
+        const originalText = button.innerText;
+        button.innerText = 'Dang xu ly...';
+        button.disabled = true;
+
+        const items = Object.entries(orderDraft).map(([id, item]) => ({
+            product_id: parseInt(id, 10),
+            quantity: item.qty,
+        }));
+
+        try {
+            const response = await fetch("{{ route('checkout.prepare') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    shop_id: {{ $shop->id }},
+                    items,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Khong the chuyen sang trang thanh toan.');
             }
+
+            window.location.href = data.redirect;
+        } catch (error) {
+            alert(error.message);
+            button.innerText = originalText;
+            button.disabled = false;
         }
-        
-        // Hoàn tất lưu xuống Carts table, redirect qua trang giỏ hàng của Customer 
-        window.location.href = "{{ route('cart.index') }}";
     }
 
-    // Khởi tạo giỏ hàng rỗng khi load trang
     document.addEventListener('DOMContentLoaded', () => {
-        renderCart();
+        renderDraft();
     });
 </script>
 @endsection

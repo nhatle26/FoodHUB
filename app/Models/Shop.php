@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Shop extends Model
 {
@@ -14,6 +16,17 @@ class Shop extends Model
         'status',
         'reject_reason',
     ];
+
+    protected $casts = [
+        'rating_avg' => 'decimal:1',
+        'total_orders' => 'integer',
+        'total_reviews' => 'integer',
+    ];
+
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     public function details()
     {
@@ -33,6 +46,11 @@ class Shop extends Model
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function vouchers(): HasMany
+    {
+        return $this->hasMany(Voucher::class);
     }
 
     public function orders()
