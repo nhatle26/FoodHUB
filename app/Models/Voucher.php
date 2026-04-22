@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Voucher extends Model
 {
@@ -19,6 +20,7 @@ class Voucher extends Model
         'is_active',
         'starts_at',
         'expires_at',
+        'conditions',
     ];
 
     protected $casts = [
@@ -30,5 +32,11 @@ class Voucher extends Model
         'is_active' => 'boolean',
         'starts_at' => 'datetime',
         'expires_at' => 'datetime',
+        'conditions' => 'array',
     ];
+
+    public function shop(): BelongsTo
+    {
+        return $this->belongsTo(Shop::class);
+    }
 }
