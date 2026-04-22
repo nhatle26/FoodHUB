@@ -20,6 +20,6 @@ class Customer extends Model
 
     public function addresses()
     {
-        return $this->hasMany(CustomerAddress::class);
+        return $this->hasMany(CustomerAddress::class, 'user_id', 'user_id');
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class RegisterController extends Controller
@@ -46,8 +47,11 @@ class RegisterController extends Controller
             'full_name' => $request->name,
         ]);
 
-        // Redirect về login với thông báo thành công
-        return redirect()->route('login')->with('success', 'Đăng ký thành công! Vui lòng đăng nhập.');
+        // Tự động đăng nhập
+        Auth::login($user);
+
+        // Redirect về trang chủ
+        return redirect()->route('home')->with('success', 'Đăng ký thành công! Chào mừng bạn đến với FoodHub.');
     }
     public function create()
     {
@@ -121,7 +125,10 @@ class RegisterController extends Controller
             'shop_id' => $shop->id,
         ]);
 
-        return back()->with('success', 'Đăng ký shop thành công');
+        // Tự động đăng nhập
+        Auth::login($user);
+
+        return redirect()->route('shop.dashboard')->with('success', 'Đăng ký shop thành công! Vui lòng hoàn tất thiết lập.');
     }
 
     private function makeSlug(string $name): string

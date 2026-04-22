@@ -111,10 +111,13 @@
                             <h6 class="fw-bold mb-0 text-dark">Địa chỉ giao hàng</h6>
                         </div>
                         <div class="p-3 border rounded-3 bg-white border-danger shadow-sm">
-                            <p class="mb-1 fw-bold text-dark">{{ Auth::user()->name }}</p>
-                            <p class="mb-1 small text-muted">{{ Auth::user()->phone ?? '0123456789' }}</p>
-                            <p class="small text-muted mb-2">{{ Auth::user()->address ?? 'Vui lòng cập nhật địa chỉ' }}</p>
-                            <textarea name="delivery_address" class="form-control bg-light border-0 rounded-3 shadow-sm" rows="2" placeholder="Nhập địa chỉ giao hàng">{{ Auth::user()->address ?? 'Đà Nẵng' }}</textarea>
+                            <p class="mb-1 fw-bold text-dark">{{ Auth::user()->customer->full_name ?? (Auth::user()->shop->name ?? Auth::user()->email) }}</p>
+                            <p class="mb-1 small text-muted">{{ Auth::user()->customer->phone ?? (Auth::user()->shop->details->phone ?? '') }}</p>
+                            @php
+                                $defaultAddress = Auth::user()->customer ? (Auth::user()->customer->addresses->where('is_default', 1)->first()->address_line ?? '') : (Auth::user()->shop->details->address ?? '');
+                            @endphp
+                            <p class="small text-muted mb-2">{{ $defaultAddress ?: 'Vui lòng cập nhật địa chỉ' }}</p>
+                            <textarea name="delivery_address" class="form-control bg-light border-0 rounded-3 shadow-sm" rows="2" placeholder="Nhập địa chỉ giao hàng">{{ $defaultAddress }}</textarea>
                             <span class="badge bg-danger text-white rounded-pill px-2" style="font-size: 10px;">Mặc định</span>
                         </div>
                         <button type="button" class="btn btn-outline-secondary w-100 mt-3 btn-sm rounded-3">Thêm địa chỉ mới</button>

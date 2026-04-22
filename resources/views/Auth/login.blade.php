@@ -22,21 +22,31 @@
                     <p class="text-muted">Vui lòng nhập thông tin tài khoản của bạn</p>
                 </div>
 
-                <form action="{{ route('login.post') }}" method="POST">
+                <form action="{{ route('login.post') }}" method="POST" novalidate>
                     @csrf
+                    
+                    @if(session('success'))
+                        <div class="alert alert-success">{{ session('success') }}</div>
+                    @endif
                     <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
-                            <input type="email" name="email" class="form-control" placeholder="example@gmail.com" required>
+                        <label class="form-label fw-semibold">Email</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text bg-light text-muted border-end-0"><i class="fa-solid fa-envelope"></i></span>
+                            <input type="email" name="email" class="form-control border-start-0 @error('email') is-invalid @enderror" placeholder="example@gmail.com" value="{{ old('email') }}" required>
+                            @error('email')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Mật khẩu</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                            <input type="password" name="password" class="form-control" placeholder="********" required>
+                        <label class="form-label fw-semibold">Mật khẩu</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text bg-light text-muted border-end-0"><i class="fa-solid fa-lock"></i></span>
+                            <input type="password" name="password" class="form-control border-start-0 @error('password') is-invalid @enderror" placeholder="********" required>
+                            @error('password')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
 

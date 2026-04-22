@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Shop;
 
-class ShopController extends Controller
+class FrontShopController extends Controller
 {
     public function show($id)
     {

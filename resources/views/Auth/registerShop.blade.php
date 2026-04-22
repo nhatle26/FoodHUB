@@ -39,12 +39,8 @@
             @endif
 
             @if ($errors->any())
-                <div class="alert alert-danger rounded-4">
-                    <ul class="mb-0 ps-3">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                <div class="alert alert-danger rounded-4 py-2 small">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i> Vui lòng kiểm tra lại các thông tin chưa hợp lệ bên dưới.
                 </div>
             @endif
 
@@ -60,8 +56,9 @@
                                     <svg viewBox="0 0 16 16" class="icon-svg" aria-hidden="true"><path d="M8 1a3 3 0 1 1 0 6 3 3 0 0 1 0-6m0 7c-2.761 0-5 1.567-5 3.5C3 12.328 3.672 13 4.5 13h7c.828 0 1.5-.672 1.5-1.5C13 9.567 10.761 8 8 8"/></svg>
                                 </span>
                                 <input type="text" name="name" id="name" value="{{ old('name') }}"
-                                    class="form-control rounded-4 py-2 input-with-icon" placeholder="Ví dụ: Phở Hà Nội, Cơm Tấm Sài Gòn...">
+                                    class="form-control rounded-4 py-2 input-with-icon @error('name') is-invalid @enderror" placeholder="Ví dụ: Phở Hà Nội, Cơm Tấm Sài Gòn...">
                             </div>
+                            @error('name') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                         </div>
 
                         <div>
@@ -71,8 +68,9 @@
                                     <svg viewBox="0 0 16 16" class="icon-svg" aria-hidden="true"><path d="M3.654 1.328a.68.68 0 0 1 .737-.17l2.522 1.01a.68.68 0 0 1 .39.805l-.547 2.19a.68.68 0 0 1-.64.516l-1.113.043a11.7 11.7 0 0 0 5.275 5.275l.043-1.113a.68.68 0 0 1 .516-.64l2.19-.547a.68.68 0 0 1 .805.39l1.01 2.522a.68.68 0 0 1-.17.737l-1.065 1.065a1.75 1.75 0 0 1-1.862.437l-.654-.218A15.6 15.6 0 0 1 2.28 4.924l-.218-.654a1.75 1.75 0 0 1 .437-1.862z"/></svg>
                                 </span>
                                 <input type="text" name="phone" id="phone" value="{{ old('phone') }}"
-                                    class="form-control rounded-4 py-2 input-with-icon" placeholder="0901234567">
+                                    class="form-control rounded-4 py-2 input-with-icon @error('phone') is-invalid @enderror" placeholder="0901234567">
                             </div>
+                            @error('phone') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                         </div>
                     </div>
 
@@ -84,8 +82,9 @@
                                     <svg viewBox="0 0 16 16" class="icon-svg" aria-hidden="true"><path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555ZM0 4.697v7.104l5.803-3.558L0 4.697ZM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757Zm3.436-.586L16 11.801V4.697l-5.803 3.546Z"/></svg>
                                 </span>
                                 <input type="email" name="email" id="email" value="{{ old('email') }}"
-                                    class="form-control rounded-4 py-2 input-with-icon" placeholder="admin@shop.com">
+                                    class="form-control rounded-4 py-2 input-with-icon @error('email') is-invalid @enderror" placeholder="admin@shop.com">
                             </div>
+                            @error('email') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="w-100">
@@ -95,8 +94,9 @@
                                     <svg viewBox="0 0 16 16" class="icon-svg" aria-hidden="true"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>
                                 </span>
                                 <input type="password" name="password" id="password"
-                                    class="form-control rounded-4 py-2 input-with-icon" placeholder="Tối thiểu 8 ký tự">
+                                    class="form-control rounded-4 py-2 input-with-icon @error('password') is-invalid @enderror" placeholder="Tối thiểu 8 ký tự">
                             </div>
+                            @error('password') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                         </div>
                     </div>
 
@@ -107,8 +107,9 @@
                                 <svg viewBox="0 0 16 16" class="icon-svg" aria-hidden="true"><path d="M8 16s6-5.686 6-10A6 6 0 1 0 2 6c0 4.314 6 10 6 10m0-7.5A2.5 2.5 0 1 1 8 3.5a2.5 2.5 0 0 1 0 5"/></svg>
                             </span>
                             <input type="text" name="address" id="address" value="{{ old('address') }}"
-                                class="form-control rounded-4 py-2 input-with-icon" placeholder="Số nhà, tên đường, phường xã, quận huyện...">
+                                class="form-control rounded-4 py-2 input-with-icon @error('address') is-invalid @enderror" placeholder="Số nhà, tên đường, phường xã, quận huyện...">
                         </div>
+                        @error('address') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="mb-3">
@@ -141,6 +142,7 @@
                                 <button type="button" class="upload-action-btn delete" id="cover_remove">Xóa ảnh</button>
                             </div>
                         </div>
+                        @error('cover_image') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                     </div>
 
                     <button type="button" class="btn btn-foodhub rounded-4 w-100 py-2 fw-semibold"
@@ -160,8 +162,9 @@
                                     <svg viewBox="0 0 16 16" class="icon-svg" aria-hidden="true"><path d="M8 3.5a.5.5 0 0 1 .5.5v4.086l2.207 1.293a.5.5 0 0 1-.507.862l-2.45-1.435A.5.5 0 0 1 7.5 8.5V4a.5.5 0 0 1 .5-.5"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m0-1A7 7 0 1 1 8 1a7 7 0 0 1 0 14"/></svg>
                                 </span>
                                 <input type="time" name="open_time" value="{{ old('open_time') }}"
-                                    class="form-control rounded-4 py-2 input-with-icon">
+                                    class="form-control rounded-4 py-2 input-with-icon @error('open_time') is-invalid @enderror">
                             </div>
+                            @error('open_time') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold">Giờ đóng cửa</label>
@@ -170,8 +173,9 @@
                                     <svg viewBox="0 0 16 16" class="icon-svg" aria-hidden="true"><path d="M8 3.5a.5.5 0 0 1 .5.5v4.086l2.207 1.293a.5.5 0 0 1-.507.862l-2.45-1.435A.5.5 0 0 1 7.5 8.5V4a.5.5 0 0 1 .5-.5"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m0-1A7 7 0 1 1 8 1a7 7 0 0 1 0 14"/></svg>
                                 </span>
                                 <input type="time" name="close_time" value="{{ old('close_time') }}"
-                                    class="form-control rounded-4 py-2 input-with-icon">
+                                    class="form-control rounded-4 py-2 input-with-icon @error('close_time') is-invalid @enderror">
                             </div>
+                            @error('close_time') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                         </div>
                     </div>
 
@@ -192,6 +196,7 @@
                                 <button type="button" class="upload-action-btn delete" id="logo_remove">Xóa ảnh</button>
                             </div>
                         </div>
+                        @error('logo') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="mb-3">

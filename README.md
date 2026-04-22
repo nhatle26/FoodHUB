@@ -1,58 +1,78 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# FoodHub - Nền Tảng Đặt Đồ Ăn Đa Shop Trực Tuyến
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+FoodHub là một ứng dụng đặt đồ ăn trực tuyến theo mô hình đa shop (multi-vendor) được xây dựng bằng framework Laravel. Dự án cho phép nhiều cửa hàng thực phẩm cùng đăng ký kinh doanh trên một nền tảng duy nhất, đồng thời cung cấp trải nghiệm đặt món trơn tru cho khách hàng.
 
-## About Laravel
+## 🚀 Tính năng nổi bật
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 🍔 Dành cho Khách hàng (Customer)
+*   **Tìm kiếm & Khám phá:** Duyệt danh sách quán ăn, phân loại theo danh mục (Trà sữa, Đồ ăn vặt, v.v.), tìm kiếm tên quán/món ăn.
+*   **Giỏ hàng thông minh:** Đặt món, thay đổi số lượng, kiểm tra chỉ đặt cùng 1 shop trong 1 lần checkout.
+*   **Quản lý Đơn hàng:** Xem lịch sử đặt món, theo dõi trạng thái, hủy đơn khi chưa xác nhận.
+*   **Tương tác:** Thêm shop vào danh sách "Yêu thích", viết đánh giá (Review 1-5 sao) sau khi đơn hoàn thành.
+*   **Hồ sơ cá nhân:** Cập nhật thông tin liên hệ, địa chỉ giao hàng mặc định, đổi avatar.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 🏪 Dành cho Chủ cửa hàng (Vendor/Shop)
+*   **Cửa hàng trực tuyến:** Quản lý Logo, Banner, Giờ mở cửa, mô tả quán, trạng thái Đóng/Mở.
+*   **Quản lý Menu:** Thêm, sửa, xóa, phân loại món ăn. Đánh dấu hết hàng tạm thời.
+*   **Xử lý Đơn hàng:** Chuyển trạng thái đơn hàng (Chờ xác nhận -> Đang chuẩn bị -> Đang giao -> Đã giao), Từ chối đơn hàng.
+*   **Mã giảm giá (Voucher):** Tự tạo mã giảm giá theo %, theo số tiền cố định, thiết lập điều kiện sử dụng.
+*   **Thống kê:** Dashboard theo dõi doanh thu và đơn hàng trực quan.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 👑 Dành cho Quản trị viên (Admin)
+*   **Quản lý Hệ thống:** Dashboard thống kê tổng quan (User, Shop, Doanh số toàn sàn).
+*   **Kiểm duyệt:** Xét duyệt tài khoản đăng ký Shop mới, khóa Shop vi phạm.
+*   **Quản lý Users & Danh mục:** Thêm, sửa, xóa người dùng và danh mục thực phẩm.
+*   **Báo cáo Đơn hàng:** Theo dõi toàn bộ luồng đơn hàng, chức năng **Xuất file CSV (Export)** đơn hàng toàn sàn.
 
-## Learning Laravel
+## 🛠 Tech Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+*   **Backend:** PHP 8.2, Laravel 10 (Hoặc 11)
+*   **Frontend:** Blade Template, Bootstrap 5 (Custom CSS), JavaScript
+*   **Database:** MySQL
+*   **Tính năng bổ sung:** Laravel DB Transactions, Eloquent ORM (Relationships), File Storage (Upload ảnh)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## ⚙️ Hướng dẫn cài đặt (Local)
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+1. **Clone repository:**
+   ```bash
+   git clone <repo-url>
+   cd FoodHUB
+   ```
 
-## Agentic Development
+2. **Cài đặt thư viện:**
+   ```bash
+   composer install
+   npm install
+   ```
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+3. **Cấu hình môi trường:**
+   Tạo file `.env` từ file mẫu và thiết lập kết nối MySQL của bạn:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-```bash
-composer require laravel/boost --dev
+4. **Chạy Migration & Seeder (Tạo dữ liệu mẫu):**
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
 
-php artisan boost:install
-```
+5. **Liên kết thư mục Storage (Để hiển thị ảnh upload):**
+   ```bash
+   php artisan storage:link
+   ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+6. **Chạy ứng dụng:**
+   ```bash
+   php artisan serve
+   ```
+   Mở trình duyệt tại: `http://localhost:8000`
 
-## Contributing
+## 👥 Phân công công việc (Team 3 người)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+*   **Thành viên 1 (Frontend & UX):** Cấu hình Layout Blade, Authentication UI, Trang chủ, Trang chi tiết Shop. Giỏ hàng và Checkout UI.
+*   **Thành viên 2 (Vendor & Product):** Database Schema, CRUD Sản phẩm, Quản lý đơn hàng (phía Shop), Tính năng Voucher, Cài đặt thông tin Shop.
+*   **Thành viên 3 (Customer & Admin):** Quản lý Giỏ hàng (Backend), Lịch sử đơn hàng, Tính năng Đánh giá, Yêu thích. Dashboard Admin, Xuất CSV, Kiểm duyệt Shop.
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+*Dự án kết thúc môn học - Nhóm phát triển FoodHUB*

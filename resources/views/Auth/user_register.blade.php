@@ -12,38 +12,47 @@
             <p class="text-muted">Chào mừng bạn gia nhập FoodHub</p>
         </div>
 
-        <form action="{{ route('register.post') }}" method="POST">
+        <form action="{{ route('register.post') }}" method="POST" novalidate>
             @csrf
             
             <div class="mb-3">
-                <label class="form-label">Họ và Tên</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
-                    <input type="text" name="name" class="form-control" placeholder="Nguyễn Văn A" required>
+                <label class="form-label fw-semibold">Họ và Tên</label>
+                <div class="input-group has-validation">
+                    <span class="input-group-text bg-light text-muted border-end-0"><i class="fa-solid fa-user"></i></span>
+                    <input type="text" name="name" class="form-control border-start-0 @error('name') is-invalid @enderror" placeholder="Nguyễn Văn A" value="{{ old('name') }}" required>
+                    @error('name')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Email</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
-                    <input type="email" name="email" class="form-control" placeholder="example@gmail.com" required>
+                <label class="form-label fw-semibold">Email</label>
+                <div class="input-group has-validation">
+                    <span class="input-group-text bg-light text-muted border-end-0"><i class="fa-solid fa-envelope"></i></span>
+                    <input type="email" name="email" class="form-control border-start-0 @error('email') is-invalid @enderror" placeholder="example@gmail.com" value="{{ old('email') }}" required>
+                    @error('email')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Mật khẩu</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                    <input type="password" name="password" class="form-control" placeholder="********" required>
+                <label class="form-label fw-semibold">Mật khẩu</label>
+                <div class="input-group has-validation">
+                    <span class="input-group-text bg-light text-muted border-end-0"><i class="fa-solid fa-lock"></i></span>
+                    <input type="password" name="password" class="form-control border-start-0 @error('password') is-invalid @enderror" placeholder="Tối thiểu 8 ký tự" required>
+                    @error('password')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Xác nhận mật khẩu</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                    <input type="password" name="password_confirmation" class="form-control" placeholder="********" required>
+                <label class="form-label fw-semibold">Xác nhận mật khẩu</label>
+                <div class="input-group has-validation">
+                    <span class="input-group-text bg-light text-muted border-end-0"><i class="fa-solid fa-lock"></i></span>
+                    <input type="password" name="password_confirmation" class="form-control border-start-0" placeholder="Nhập lại mật khẩu" required>
                 </div>
             </div>
 
