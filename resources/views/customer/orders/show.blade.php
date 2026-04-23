@@ -38,7 +38,7 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             @if($item->product->image ?? false)
-                                                @php $productImgUrl = str_starts_with($item->product->image, 'http') ? $item->product->image : asset('storage/' . $item->product->image); @endphp
+                                                @php $productImgUrl = str_starts_with($item->product->image, 'http') ? $item->product->image : asset('storage/' . preg_replace('/^\/?(storage\/)?/', '', $item->product->image)); @endphp
                                                 <img src="{{ $productImgUrl }}" alt="{{ $item->product->name }}" class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
                                             @endif
                                             <div>

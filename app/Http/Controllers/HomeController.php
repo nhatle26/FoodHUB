@@ -30,7 +30,14 @@ class HomeController extends Controller
         }
 
         // 5. Lấy kết quả và phân trang (12 quán 1 trang)
-        $shops = $query->latest()->paginate(12);
+        $shops = $query->with(['metrics', 'details'])->latest()->paginate(12);
+
+        // Gán rating thực tế
+        $shops->getCollection()->transform(function ($shop) {
+            $shop->rating = $shop->metrics->rating_avg ?? 0;
+            $shop->total_reviews = $shop->metrics->review_count ?? 0;
+            return $shop;
+        });
 
         // Truyền dữ liệu ra view
         return view('index', compact('categories', 'shops'));

@@ -28,7 +28,8 @@
                         @forelse($cartItems as $item)
                         <div class="d-flex align-items-center justify-content-between mb-4">
                             <div class="d-flex align-items-center">
-                                <img src="{{ asset('storage/' . $item->product->image) }}" class="rounded-3 border" width="80" height="80" style="object-fit: cover;">
+                                @php $productImgUrl = str_starts_with($item->product->image, 'http') ? $item->product->image : asset('storage/' . preg_replace('/^\/?(storage\/)?/', '', $item->product->image)); @endphp
+                                <img src="{{ $productImgUrl }}" class="rounded-3 border" width="80" height="80" style="object-fit: cover;">
                                 <div class="ms-3">
                                     <h6 class="mb-1 fw-bold">{{ $item->product->name }}</h6>
                                     <div class="d-flex align-items-center bg-light rounded-pill px-2 border" style="width: fit-content;">
@@ -49,7 +50,7 @@
                                 </div>
                             </div>
                             <div class="text-end">
-                                <span class="fw-bold text-danger fs-5">{{ number_format($item->product->price * $item->quantity) }}đ</span>
+                                <span class="fw-bold text-danger fs-5">{{ number_format($item->product->price * $item->quantity, 0, ',', '.') }}₫</span>
                                 <form action="{{ route('cart.remove', $item->id) }}" method="POST" class="d-inline ms-2">
                                     @csrf
                                     @method('DELETE')
@@ -85,7 +86,7 @@
                     <h6 class="fw-bold mb-4">Chi tiết thanh toán</h6>
                     <div class="d-flex justify-content-between mb-2 text-muted small">
                         <span>Tạm tính ({{ $cartItems->count() }} món)</span>
-                        <span>{{ number_format($subtotal) }}đ</span>
+                        <span>{{ number_format($subtotal, 0, ',', '.') }}₫</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3 text-muted small">
                         <span>Phí giao hàng</span>
@@ -94,7 +95,7 @@
                     <hr class="text-muted opacity-25">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="fw-bold mb-0">Tổng cộng</h5>
-                        <h3 class="fw-bold text-danger mb-0">{{ number_format($subtotal) }}đ</h3>
+                        <h3 class="fw-bold text-danger mb-0">{{ number_format($subtotal, 0, ',', '.') }}₫</h3>
                     </div>
                 </div>
             </div>

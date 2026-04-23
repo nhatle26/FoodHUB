@@ -28,19 +28,19 @@
                         <tr>
                             <td>{{ $item->product->name ?? 'Sản phẩm đã bị xóa' }}</td>
                             <td class="text-center">{{ $item->quantity }}</td>
-                            <td class="text-end">{{ number_format($item->price) }}₫</td>
-                            <td class="text-end fw-bold">{{ number_format($item->price * $item->quantity) }}₫</td>
+                            <td class="text-end">{{ number_format($item->product_price, 0, ',', '.') }}₫</td>
+                            <td class="text-end fw-bold">{{ number_format($item->subtotal, 0, ',', '.') }}₫</td>
                         </tr>
                         @endforeach
                     </tbody>
                     <tfoot>
                         <tr>
                             <td colspan="3" class="text-end fw-bold">Tạm tính</td>
-                            <td class="text-end fw-bold">{{ number_format($order->subtotal) }}₫</td>
+                            <td class="text-end fw-bold">{{ number_format($order->subtotal, 0, ',', '.') }}₫</td>
                         </tr>
                         <tr>
                             <td colspan="3" class="text-end fw-bold text-primary fs-5 border-0">Tổng cộng</td>
-                            <td class="text-end fw-bold text-primary fs-5 border-0">{{ number_format($order->total) }}₫</td>
+                            <td class="text-end fw-bold text-primary fs-5 border-0">{{ number_format($order->total, 0, ',', '.') }}₫</td>
                         </tr>
                     </tfoot>
                 </table>

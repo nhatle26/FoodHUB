@@ -21,13 +21,17 @@ class FrontShopController extends Controller
             if (!isset($menuCategories[$groupName])) {
                 $menuCategories[$groupName] = [];
             }
+            $img = $product->image ?? null;
+            if ($img && !str_starts_with($img, 'http')) {
+                $img = preg_replace('/^\/?(storage\/)?/', '', $img);
+                $img = asset('storage/' . $img);
+            }
             $menuCategories[$groupName][] = [
                 'id' => $product->id,
                 'name' => $product->name,
                 'description' => $product->description,
                 'price' => $product->price,
-                // Replace storage path logic as needed, assuming image exists
-                'image' => $product->image ? asset('storage/'.$product->image) : 'https://images.unsplash.com/photo-1544681280-d2dc2c07a3c3?w=300&q=80',
+                'image' => $img ?: 'https://images.unsplash.com/photo-1544681280-d2dc2c07a3c3?w=300&q=80',
             ];
         }
 
@@ -39,6 +43,16 @@ class FrontShopController extends Controller
         $details = $shop->details;
         $metrics = $shop->metrics;
         
+        $bannerImg = $details->cover_image ?? null;
+        if ($bannerImg && !str_starts_with($bannerImg, 'http')) {
+            $bannerImg = asset('storage/' . preg_replace('/^\/?(storage\/)?/', '', $bannerImg));
+        }
+        
+        $logoImg = $details->logo ?? null;
+        if ($logoImg && !str_starts_with($logoImg, 'http')) {
+            $logoImg = asset('storage/' . preg_replace('/^\/?(storage\/)?/', '', $logoImg));
+        }
+
         $shopData = [
             'name' => $shop->name,
             'status' => $shop->status === 'active' || $shop->status === 'approved' ? 'Đang mở cửa' : 'Đóng cửa',
@@ -49,8 +63,8 @@ class FrontShopController extends Controller
             'hours' => ($details->open_time ?? false) && ($details->close_time ?? false) 
                 ? \Carbon\Carbon::parse($details->open_time)->format('H:i') . ' - ' . \Carbon\Carbon::parse($details->close_time)->format('H:i') 
                 : '07:00 - 22:00',
-            'banner' => ($details->cover_image ?? false) ? asset('storage/'.$details->cover_image) : asset('images/shop_hero.png'), 
-            'logo' => ($details->logo ?? false) ? asset('storage/'.$details->logo) : 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=200&q=80'
+            'banner' => $bannerImg ?: asset('images/shop_hero.png'), 
+            'logo' => $logoImg ?: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=200&q=80'
         ];
 
         return view('shop.show', compact('shopData', 'menuCategories', 'shop'));

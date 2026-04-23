@@ -47,8 +47,11 @@
                         @forelse ($orderItems as $item)
                             <div class="d-flex align-items-center justify-content-between mb-4">
                                 <div class="d-flex align-items-center">
+                                    @php
+                                        $imgUrl = !empty($item['product_image']) ? (str_starts_with($item['product_image'], 'http') ? $item['product_image'] : asset('storage/' . preg_replace('/^\/?(storage\/)?/', '', $item['product_image']))) : 'https://images.unsplash.com/photo-1544681280-d2dc2c07a3c3?w=300&q=80';
+                                    @endphp
                                     <img
-                                        src="{{ !empty($item['product_image']) ? asset('storage/' . $item['product_image']) : 'https://images.unsplash.com/photo-1544681280-d2dc2c07a3c3?w=300&q=80' }}"
+                                        src="{{ $imgUrl }}"
                                         class="rounded-3 border"
                                         width="80"
                                         height="80"
@@ -81,7 +84,7 @@
                                 </div>
 
                                 <div class="text-end">
-                                    <span class="fw-bold text-danger fs-5">{{ number_format($item['subtotal']) }}d</span>
+                                    <span class="fw-bold text-danger fs-5">{{ number_format($item['subtotal'], 0, ',', '.') }}₫</span>
 
                                     <form action="{{ route('checkout.items.remove', $item['product_id']) }}" method="POST" class="d-inline ms-2">
                                         @csrf
@@ -127,7 +130,7 @@
                     @elseif ($appliedVoucher)
                         <div class="mt-3 p-3 rounded-3 bg-success-subtle text-success small border border-success-subtle">
                             Da ap dung ma <strong>{{ $appliedVoucher['code'] }}</strong>.
-                            Ban duoc giam <strong>{{ number_format($discount) }}d</strong>.
+                            Ban duoc giam <strong>{{ number_format($discount, 0, ',', '.') }}₫</strong>.
                         </div>
 
                         @if (! empty($appliedVoucher['condition_labels']))
@@ -149,24 +152,24 @@
 
                     <div class="d-flex justify-content-between mb-2 text-muted small">
                         <span>Tam tinh ({{ $orderItems->count() }} mon)</span>
-                        <span>{{ number_format($subtotal) }}d</span>
+                        <span>{{ number_format($subtotal, 0, ',', '.') }}₫</span>
                     </div>
 
                     <div class="d-flex justify-content-between mb-2 text-muted small">
                         <span>Phi giao hang</span>
-                        <span class="text-success fw-bold">{{ number_format($shippingFee) }}d</span>
+                        <span class="text-success fw-bold">{{ number_format($shippingFee, 0, ',', '.') }}₫</span>
                     </div>
 
                     <div class="d-flex justify-content-between mb-3 text-muted small">
                         <span>Giam gia voucher</span>
-                        <span class="fw-bold {{ $discount > 0 ? 'text-danger' : '' }}">-{{ number_format($discount) }}d</span>
+                        <span class="fw-bold {{ $discount > 0 ? 'text-danger' : '' }}">-{{ number_format($discount, 0, ',', '.') }}₫</span>
                     </div>
 
                     <hr class="text-muted opacity-25">
 
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="fw-bold mb-0">Tong cong</h5>
-                        <h3 class="fw-bold text-danger mb-0">{{ number_format($total) }}d</h3>
+                        <h3 class="fw-bold text-danger mb-0">{{ number_format($total, 0, ',', '.') }}₫</h3>
                     </div>
                 </div>
             </div>
