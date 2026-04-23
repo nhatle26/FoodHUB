@@ -39,6 +39,7 @@
 <body>
 
     @include('layouts.partials.header')
+    @include('layouts.partials.toast')
 
     <main>
         @yield('content')

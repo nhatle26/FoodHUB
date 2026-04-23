@@ -58,14 +58,16 @@
                             <label class="form-label fw-bold">Ảnh Logo</label>
                             <input type="file" name="logo" class="form-control" accept="image/*">
                             @if($shop->details->logo ?? false)
-                                <img src="{{ asset($shop->details->logo) }}" class="mt-2 rounded" style="height: 60px;">
+                                @php $logoUrl = str_starts_with($shop->details->logo, 'http') ? $shop->details->logo : asset('storage/' . $shop->details->logo); @endphp
+                                <img src="{{ $logoUrl }}" class="mt-2 rounded" style="height: 60px;">
                             @endif
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Ảnh Banner (Bìa)</label>
                             <input type="file" name="banner" class="form-control" accept="image/*">
                             @if($shop->details->banner ?? false)
-                                <img src="{{ asset($shop->details->banner) }}" class="mt-2 rounded w-100" style="height: 60px; object-fit: cover;">
+                                @php $bannerUrl = str_starts_with($shop->details->banner, 'http') ? $shop->details->banner : asset('storage/' . $shop->details->banner); @endphp
+                                <img src="{{ $bannerUrl }}" class="mt-2 rounded w-100" style="height: 60px; object-fit: cover;">
                             @endif
                         </div>
                     </div>

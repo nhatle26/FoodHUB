@@ -95,6 +95,7 @@ class UserController extends Controller
         ]);
 
         $userData = [
+            'name' => $validated['name'],
             'email' => $validated['email'],
             'role' => $validated['role'],
             'is_active' => $request->has('is_active'),
@@ -123,15 +124,23 @@ class UserController extends Controller
                 }
             } elseif ($validated['role'] === 'shop') {
                 $shop = $user->shop;
-                if ($shop) {
+                if (!$shop) {
+                    $shop = \App\Models\Shop::create([
+                        'user_id' => $user->id,
+                        'category_id' => \App\Models\Category::first()->id ?? 1,
+                        'name' => $validated['name'],
+                        'slug' => \Illuminate\Support\Str::slug($validated['name']),
+                        'status' => 'active',
+                    ]);
+                } else {
                     $shop->name = $validated['name'];
                     $shop->save();
-                    
-                    $details = $shop->details ?? new \App\Models\ShopDetail(['shop_id' => $shop->id]);
-                    $details->phone = $validated['phone'] ?? null;
-                    $details->address = $validated['address'] ?? null;
-                    $details->save();
                 }
+                
+                $details = $shop->details ?? new \App\Models\ShopDetail(['shop_id' => $shop->id]);
+                $details->phone = $validated['phone'] ?? null;
+                $details->address = $validated['address'] ?? null;
+                $details->save();
             }
             DB::commit();
             return redirect()->route('admin.users.index')->with('success', 'Cập nhật user thành công!');

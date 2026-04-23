@@ -44,11 +44,13 @@ Route::prefix('shop')->name('shop.')->middleware('auth')->group(function () {
     Route::post('/settings/toggle-status', [SettingController::class, 'toggleStatus'])->name('settings.toggle_status');
 });
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    // Shop routes — đặt explicit routes TRƯỚC resource để tránh conflict
     Route::get('shops/pending', [ShopManageController::class, 'pendingShops'])->name('shops.pending');
     Route::post('shops/{shop}/approve', [ShopManageController::class, 'approveShop'])->name('shops.approve');
     Route::post('shops/{shop}/reject', [ShopManageController::class, 'rejectShop'])->name('shops.reject');
+    Route::resource('shops', ShopManageController::class)->only(['index', 'show', 'edit', 'update']);
     Route::resource('users', UserController::class);
     Route::resource('categories', CategoryController::class)->except(['show']);
     Route::get('orders', [OrderManageController::class, 'index'])->name('orders.index');
@@ -94,6 +96,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/wishlist/toggle/{shop}', [WishlistController::class, 'toggle'])->name('customer.wishlist.toggle');
 });
 
+Route::post('/checkout/prepare', [CartController::class, 'prepareCheckout'])->name('checkout.prepare');
 Route::post('/checkout/process', [CartController::class, 'processCheckout'])->name('checkout.process');
 
 // ========================================================

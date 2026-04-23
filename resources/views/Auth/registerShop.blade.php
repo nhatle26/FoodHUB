@@ -5,6 +5,13 @@
 @endsection
 
 @section('content')
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <style>
+        .cropper-modal-container { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1050; align-items: center; justify-content: center; }
+        .cropper-modal-content { background: #fff; border-radius: 12px; padding: 20px; width: 90%; max-width: 600px; }
+        .img-container { max-height: 400px; width: 100%; margin-bottom: 20px; }
+        .img-container img { max-width: 100%; }
+    </style>
     @php
         $goStep2 =
             old('description') ||
@@ -132,10 +139,10 @@
                                 <span class="upload-icon-badge">
                                     <svg viewBox="0 0 16 16" class="icon-svg" aria-hidden="true"><path d="M8 0a5.53 5.53 0 0 0-5.234 3.712A4.5 4.5 0 0 0 4.5 12H7V9H5.707L8 6.707 10.293 9H9v3h2.5a3.5 3.5 0 0 0 .604-6.948A5.53 5.53 0 0 0 8 0"/><path d="M7.5 12.5h1v3h-1z"/></svg>
                                 </span>
-                                <span>Nhấp để chọn ảnh bìa<br><small class="text-muted fw-normal">Khuyến nghị 1200x400px,
-                                        tối đa 2MB</small></span>
+                                <span>Nhấp để chọn ảnh bìa<br><small class="text-muted fw-normal">Khuyến nghị tỷ lệ 3:1</small></span>
                             </label>
-                            <input type="file" name="cover_image" id="cover_image" class="d-none" accept="image/*">
+                            <input type="file" id="cover_image" class="d-none" accept="image/jpeg,image/png,image/webp">
+                            <input type="hidden" name="cover_image_data" id="cover_image_data">
                             <img id="cover_preview" class="upload-preview" alt="Xem trước ảnh bìa">
                             <div class="upload-actions" id="cover_actions">
                                 <label for="cover_image" class="upload-action-btn mb-0">Đổi ảnh</label>
@@ -143,6 +150,7 @@
                             </div>
                         </div>
                         @error('cover_image') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
+                        @error('cover_image_data') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                     </div>
 
                     <button type="button" class="btn btn-foodhub rounded-4 w-100 py-2 fw-semibold"
@@ -186,10 +194,10 @@
                                 <span class="upload-icon-badge">
                                     <svg viewBox="0 0 16 16" class="icon-svg" aria-hidden="true"><path d="M14.002 3a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2.001a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM2 4v8h12V4zm10.648 7H3.354l2.387-3.102a.5.5 0 0 1 .79-.01l1.203 1.5 2.402-3.104a.5.5 0 0 1 .79.017zM4.502 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/></svg>
                                 </span>
-                                <span>Chọn logo shop<br><small class="text-muted fw-normal">JPG, PNG, tối đa
-                                        1MB</small></span>
+                                <span>Chọn logo shop<br><small class="text-muted fw-normal">Tỷ lệ 1:1</small></span>
                             </label>
-                            <input type="file" name="logo" id="logo" class="d-none" accept="image/*">
+                            <input type="file" id="logo" class="d-none" accept="image/jpeg,image/png,image/webp">
+                            <input type="hidden" name="logo_data" id="logo_data">
                             <img id="logo_preview" class="logo-preview" alt="Xem trước logo">
                             <div class="upload-actions" id="logo_actions">
                                 <label for="logo" class="upload-action-btn mb-0">Đổi ảnh</label>
@@ -197,6 +205,7 @@
                             </div>
                         </div>
                         @error('logo') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
+                        @error('logo_data') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="mb-3">
@@ -214,9 +223,25 @@
             </form>
         </div>
     </div>
+
+    {{-- Cropper Modal --}}
+    <div id="cropperModal" class="cropper-modal-container">
+        <div class="cropper-modal-content">
+            <h5 class="mb-3 fw-bold">Cắt ảnh</h5>
+            <div class="img-container">
+                <img id="cropperImage" src="" alt="Ảnh cần cắt">
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <button type="button" class="btn btn-outline-secondary" id="btnCancelCrop">Hủy</button>
+                <button type="button" class="btn btn-brand" id="btnApplyCrop">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
         function nextStep() {
             const name = document.getElementById('name').value.trim();
@@ -250,81 +275,115 @@
             document.getElementById('step-label-2').className = 'small fw-semibold text-secondary';
         }
 
-        function setupUpload(inputId, previewId, boxId, removeId) {
+        let cropper = null;
+        let currentTarget = null; // 'cover' or 'logo'
+
+        const cropperModal = document.getElementById('cropperModal');
+        const cropperImage = document.getElementById('cropperImage');
+        const btnCancelCrop = document.getElementById('btnCancelCrop');
+        const btnApplyCrop = document.getElementById('btnApplyCrop');
+
+        function setupUpload(inputId, previewId, boxId, removeId, dataInputId, ratio) {
             const input = document.getElementById(inputId);
             const preview = document.getElementById(previewId);
             const box = document.getElementById(boxId);
             const removeButton = document.getElementById(removeId);
-            if (!input || !preview || !box || !removeButton) return;
-
-            const rules = {
-                cover_image: {
-                    maxSize: 2 * 1024 * 1024,
-                    minWidth: 1200,
-                    minHeight: 400,
-                    ratio: 3 / 1,
-                    message: 'Ảnh bìa phải là JPG/PNG, tối đa 2MB và tối thiểu 1200x400 (tỷ lệ 3:1).'
-                },
-                logo: {
-                    maxSize: 1 * 1024 * 1024,
-                    minWidth: 200,
-                    minHeight: 200,
-                    ratio: 1,
-                    message: 'Logo phải là JPG/PNG, tối đa 1MB và là ảnh vuông.'
-                }
-            };
+            const dataInput = document.getElementById(dataInputId);
+            
+            if (!input || !preview || !box || !removeButton || !dataInput) return;
 
             function clearPreview() {
                 input.value = '';
+                dataInput.value = '';
                 preview.style.display = 'none';
                 preview.removeAttribute('src');
                 box.classList.remove('has-image');
             }
 
-            input.addEventListener('change', function() {
-                const file = this.files[0];
+            input.addEventListener('change', function(e) {
+                const file = e.target.files[0];
                 if (!file) {
                     clearPreview();
                     return;
                 }
 
-                const rule = rules[inputId];
-                const validTypes = ['image/jpeg', 'image/png'];
-                if (!validTypes.includes(file.type) || file.size > rule.maxSize) {
-                    alert(rule.message);
+                if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                    alert('Chỉ hỗ trợ ảnh JPG, PNG hoặc WEBP');
+                    clearPreview();
+                    return;
+                }
+
+                if (file.size > 8 * 1024 * 1024) {
+                    alert('Kích thước ảnh tối đa 8MB');
                     clearPreview();
                     return;
                 }
 
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    const image = new Image();
-                    image.onload = function() {
-                        const ratio = image.width / image.height;
-                        const ratioDiff = Math.abs(ratio - rule.ratio);
-
-                        if (image.width < rule.minWidth || image.height < rule.minHeight || ratioDiff > 0.05) {
-                            alert(rule.message);
-                            clearPreview();
-                            return;
-                        }
-
-                        preview.src = event.target.result;
-                        preview.style.display = 'block';
-                        box.classList.add('has-image');
+                    cropperImage.src = event.target.result;
+                    cropperModal.style.display = 'flex';
+                    
+                    currentTarget = {
+                        type: inputId.includes('cover') ? 'cover' : 'logo',
+                        preview,
+                        box,
+                        dataInput,
+                        ratio
                     };
-                    image.src = event.target.result;
+
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+                    
+                    cropper = new Cropper(cropperImage, {
+                        aspectRatio: ratio,
+                        viewMode: 1,
+                        autoCropArea: 1,
+                        background: false
+                    });
                 };
                 reader.readAsDataURL(file);
             });
 
-            removeButton.addEventListener('click', function() {
-                clearPreview();
-            });
+            removeButton.addEventListener('click', clearPreview);
         }
 
-        setupUpload('cover_image', 'cover_preview', 'cover_box', 'cover_remove');
-        setupUpload('logo', 'logo_preview', 'logo_box', 'logo_remove');
+        btnCancelCrop.addEventListener('click', function() {
+            cropperModal.style.display = 'none';
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            if (currentTarget) {
+                document.getElementById(currentTarget.type === 'cover' ? 'cover_image' : 'logo').value = '';
+            }
+        });
+
+        btnApplyCrop.addEventListener('click', function() {
+            if (!cropper || !currentTarget) return;
+
+            const canvas = cropper.getCroppedCanvas({
+                width: currentTarget.type === 'cover' ? 1200 : 400,
+                height: currentTarget.type === 'cover' ? 400 : 400,
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high'
+            });
+
+            const base64data = canvas.toDataURL('image/jpeg', 0.85);
+            
+            currentTarget.dataInput.value = base64data;
+            currentTarget.preview.src = base64data;
+            currentTarget.preview.style.display = 'block';
+            currentTarget.box.classList.add('has-image');
+
+            // cropperModal.style.display = 'none';
+            cropper.destroy();
+            cropper = null;
+        });
+
+        setupUpload('cover_image', 'cover_preview', 'cover_box', 'cover_remove', 'cover_image_data', 3/1);
+        setupUpload('logo', 'logo_preview', 'logo_box', 'logo_remove', 'logo_data', 1/1);
     </script>
 @endpush
 

@@ -9,7 +9,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class RegisterController extends Controller
 {
@@ -63,27 +66,29 @@ class RegisterController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|max:100|unique:shops,name',
-            'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8',
-            'phone' => 'required|max:15',
-            'address' => 'required|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'description' => 'nullable|max:500',
-            'open_time' => 'nullable|date_format:H:i',
-            'close_time' => 'nullable|date_format:H:i|after:open_time',
-            'cover_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048|dimensions:min_width=1200,min_height=400,ratio=3/1',
-            'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:1024|dimensions:min_width=200,min_height=200,ratio=1/1',
+            'name'          => 'required|max:100|unique:shops,name',
+            'email'         => 'required|email|max:255|unique:users,email',
+            'password'      => 'required|string|min:8',
+            'phone'         => 'required|max:15',
+            'address'       => 'required|max:255',
+            'category_id'   => 'required|exists:categories,id',
+            'description'   => 'nullable|max:500',
+            'open_time'     => 'nullable|date_format:H:i',
+            'close_time'    => 'nullable|date_format:H:i|after:open_time',
+            // Không ràng buộc kích thước/tỷ lệ — server sẽ tự resize
+            'cover_image'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:8192',
+            'logo'             => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            // Base64 crop data (từ Cropper.js)
+            'cover_image_data' => 'nullable|string',
+            'logo_data'        => 'nullable|string',
         ], [
-            'email.unique' => 'Email này đã được sử dụng.',
-            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
-            'cover_image.mimes' => 'Ảnh bìa chỉ được phép là JPG hoặc PNG.',
-            'cover_image.max' => 'Ảnh bìa không được lớn hơn 2MB.',
-            'cover_image.dimensions' => 'Ảnh bìa phải tối thiểu 1200x400 và đúng tỷ lệ 3:1.',
-            'logo.mimes' => 'Logo chỉ được phép là JPG hoặc PNG.',
-            'logo.max' => 'Logo không được lớn hơn 1MB.',
-            'logo.dimensions' => 'Logo phải là ảnh vuông và tối thiểu 200x200.',
-            'close_time.after' => 'Giờ đóng cửa phải sau giờ mở cửa.',
+            'email.unique'      => 'Email này đã được sử dụng.',
+            'password.min'      => 'Mật khẩu phải có ít nhất 8 ký tự.',
+            'cover_image.mimes' => 'Ảnh bìa chỉ được phép là JPG, PNG hoặc WEBP.',
+            'cover_image.max'   => 'Ảnh bìa không được lớn hơn 8MB.',
+            'logo.mimes'        => 'Logo chỉ được phép là JPG, PNG hoặc WEBP.',
+            'logo.max'          => 'Logo không được lớn hơn 4MB.',
+            'close_time.after'  => 'Giờ đóng cửa phải sau giờ mở cửa.',
         ]);
 
         $user = User::create([
@@ -100,14 +105,40 @@ class RegisterController extends Controller
             'status' => 'pending',
         ]);
 
+        $manager = new ImageManager(new Driver());
+
+        // Lưu ảnh bìa
         $cover_image = null;
-        if ($request->hasFile('cover_image')) {
-            $cover_image = $request->file('cover_image')->store('shops/covers', 'public');
+        if ($request->filled('cover_image_data')) {
+            // Từ Cropper.js (base64)
+            $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $request->cover_image_data);
+            $imageData = base64_decode($imageData);
+            $img = $manager->read($imageData)->cover(1200, 400);
+            $filename = 'shops/covers/' . Str::uuid() . '.jpg';
+            Storage::disk('public')->put($filename, $img->toJpeg(85));
+            $cover_image = $filename;
+        } elseif ($request->hasFile('cover_image')) {
+            $img = $manager->read($request->file('cover_image')->getRealPath())->cover(1200, 400);
+            $filename = 'shops/covers/' . Str::uuid() . '.jpg';
+            Storage::disk('public')->put($filename, $img->toJpeg(85));
+            $cover_image = $filename;
         }
 
+        // Lưu logo
         $logo = null;
-        if ($request->hasFile('logo')) {
-            $logo = $request->file('logo')->store('shops/logos', 'public');
+        if ($request->filled('logo_data')) {
+            // Từ Cropper.js (base64)
+            $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $request->logo_data);
+            $imageData = base64_decode($imageData);
+            $img = $manager->read($imageData)->cover(400, 400);
+            $filename = 'shops/logos/' . Str::uuid() . '.jpg';
+            Storage::disk('public')->put($filename, $img->toJpeg(85));
+            $logo = $filename;
+        } elseif ($request->hasFile('logo')) {
+            $img = $manager->read($request->file('logo')->getRealPath())->cover(400, 400);
+            $filename = 'shops/logos/' . Str::uuid() . '.jpg';
+            Storage::disk('public')->put($filename, $img->toJpeg(85));
+            $logo = $filename;
         }
 
         \App\Models\ShopDetail::create([

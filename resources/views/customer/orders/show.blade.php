@@ -1,4 +1,4 @@
-@extends('layouts.auth')
+@extends('layouts.app')
 
 @section('title', 'Chi tiết đơn hàng')
 
@@ -38,7 +38,8 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             @if($item->product->image ?? false)
-                                                <img src="{{ asset($item->product->image) }}" alt="{{ $item->product->name }}" class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                                @php $productImgUrl = str_starts_with($item->product->image, 'http') ? $item->product->image : asset('storage/' . $item->product->image); @endphp
+                                                <img src="{{ $productImgUrl }}" alt="{{ $item->product->name }}" class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
                                             @endif
                                             <div>
                                                 <h6 class="mb-0 fw-medium">{{ $item->product->name ?? 'Món đã xóa' }}</h6>

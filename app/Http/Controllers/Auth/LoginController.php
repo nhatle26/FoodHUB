@@ -26,14 +26,18 @@ class LoginController extends Controller
             $request->session()->regenerate();
             
             $role = Auth::user()->role ?? 'customer';
+            $name = Auth::user()->customer->full_name ?? (Auth::user()->shop->name ?? Auth::user()->email);
             
             if ($role === 'admin') {
-                return redirect()->intended('/admin');
+                return redirect()->intended('/admin')
+                    ->with('success', 'Chào mừng Admin!');
             } elseif ($role === 'shop') {
-                return redirect()->intended('/shop/dashboard');
+                return redirect()->intended('/shop/dashboard')
+                    ->with('success', 'Đăng nhập thành công! Chào mừng ' . $name . '.');
             }
             
-            return redirect()->intended('/');
+            return redirect()->intended('/')
+                ->with('success', 'Đăng nhập thành công! Chào mừng ' . $name . '.');
         }
 
         return back()->withErrors([

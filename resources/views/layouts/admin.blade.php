@@ -405,7 +405,7 @@
                 <a href="{{ route('admin.dashboard') }}" class="nav-link-admin {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">🏠 Dashboard</a>
                 <a href="{{ route('admin.users.index') }}" class="nav-link-admin {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">👥 Quản lý Người dùng</a>
                 <a href="{{ route('admin.categories.index') }}" class="nav-link-admin {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">🗂 Quản lý Danh mục</a>
-                <a href="{{ route('admin.shops.pending') }}" class="nav-link-admin {{ request()->routeIs('admin.shops.*') ? 'active' : '' }}">🏪 Quản lý Shop</a>
+                <a href="{{ route('admin.shops.index') }}" class="nav-link-admin {{ request()->routeIs('admin.shops.*') ? 'active' : '' }}">🏪 Quản lý Shop</a>
                 <a href="{{ route('admin.orders.index') }}" class="nav-link-admin {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">🧾 Quản lý Đơn hàng</a>
                 <a href="{{ route('admin.orders.export') }}" class="nav-link-admin">📊 Xuất báo cáo CSV</a>
             </nav>
@@ -439,12 +439,7 @@
                 </div>
             </header>
 
-            @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-            @if(session('error'))
-                <div class="alert alert-danger">{{ session('error') }}</div>
-            @endif
+            @include('layouts.partials.toast')
 
             @yield('content')
         </main>

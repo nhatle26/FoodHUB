@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Cart;
-use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
@@ -14,25 +12,33 @@ use Illuminate\Support\Str;
 
 class CartController extends Controller
 {
-    /**
-     * Hiển thị danh sách món ăn trong giỏ hàng
-     */
     public function index()
     {
-        $cartItems = Cart::with('product.shop')
-            ->where('user_id', Auth::id())
-            ->get();
+        $cartSession = session('cart', ['shop_id' => null, 'items' => []]);
+        $items = $cartSession['items'];
+        $productIds = array_keys($items);
+        $products = \App\Models\Product::with('shop')->whereIn('id', $productIds)->get()->keyBy('id');
 
-        $subtotal = $cartItems->sum(function($item) {
-            return $item->product->price * $item->quantity;
-        });
+        $cartItems = collect();
+        $subtotal = 0;
+
+        foreach ($items as $pid => $qty) {
+            if ($products->has($pid)) {
+                $product = $products[$pid];
+                $subtotal += $product->price * $qty;
+                $cartItems->push((object)[
+                    'id' => $pid, // Sử dụng product_id làm ID item trong views
+                    'product_id' => $pid,
+                    'quantity' => $qty,
+                    'product' => $product,
+                    'shop' => $product->shop
+                ]);
+            }
+        }
 
         return view('customer.cart.index', compact('cartItems', 'subtotal'));
     }
 
-    /**
-     * Thêm món ăn vào giỏ hàng
-     */
     public function addToCart(Request $request)
     {
         $request->validate([
@@ -40,74 +46,85 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $product = Product::findOrFail($request->product_id);
-        $userId = Auth::id();
+        $product = \App\Models\Product::findOrFail($request->product_id);
+        $cart = session('cart', ['shop_id' => null, 'items' => []]);
 
-        $existingCartItem = Cart::where('user_id', $userId)->first();
-
-        if ($existingCartItem && $existingCartItem->shop_id != $product->shop_id) {
+        if ($cart['shop_id'] && $cart['shop_id'] != $product->shop_id) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Bạn chỉ có thể đặt món tại 1 shop trong một đơn hàng!'
             ], 400);
         }
 
-        $cart = Cart::where('user_id', $userId)
-                    ->where('product_id', $product->id)
-                    ->first();
-
-        if ($cart) {
-            $cart->quantity += $request->quantity;
-            $cart->save();
+        $cart['shop_id'] = $product->shop_id;
+        if (isset($cart['items'][$product->id])) {
+            $cart['items'][$product->id] += $request->quantity;
         } else {
-            Cart::create([
-                'user_id' => $userId,
-                'product_id' => $product->id,
-                'shop_id' => $product->shop_id,
-                'quantity' => $request->quantity,
-            ]);
+            $cart['items'][$product->id] = $request->quantity;
         }
+
+        session(['cart' => $cart]);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Đã thêm vào giỏ!',
-            'cart_count' => Cart::where('user_id', $userId)->count()
+            'cart_count' => array_sum($cart['items'])
         ]);
     }
 
     public function updateQuantity(Request $request, $id)
     {
-        $cart = Cart::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         $request->validate(['quantity' => 'required|integer|min:1']);
-        $cart->update(['quantity' => $request->quantity]);
+        $cart = session('cart', ['shop_id' => null, 'items' => []]);
+        
+        if (isset($cart['items'][$id])) {
+            $cart['items'][$id] = $request->quantity;
+            session(['cart' => $cart]);
+        }
+        
         return back()->with('success', 'Đã cập nhật!');
     }
 
     public function remove($id)
     {
-        $cart = Cart::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
-        $cart->delete();
+        $cart = session('cart', ['shop_id' => null, 'items' => []]);
+        
+        if (isset($cart['items'][$id])) {
+            unset($cart['items'][$id]);
+            if (empty($cart['items'])) {
+                $cart['shop_id'] = null;
+            }
+            session(['cart' => $cart]);
+        }
+        
         return back()->with('success', 'Đã xóa món!');
     }
 
     public function processCheckout(Request $request)
     {
-        $cartItems = Cart::where('user_id', auth()->id())->get();
+        $cartSession = session('cart', ['shop_id' => null, 'items' => []]);
+        $items = $cartSession['items'];
 
-        if ($cartItems->isEmpty()) {
+        if (empty($items)) {
             return redirect()->route('cart.index')->with('error', 'Giỏ hàng trống!');
         }
 
-        $subtotal = $cartItems->sum(function($item) {
-            return $item->product->price * $item->quantity;
-        });
+        $productIds = array_keys($items);
+        $products = \App\Models\Product::whereIn('id', $productIds)->get()->keyBy('id');
+
+        $subtotal = 0;
+        foreach ($items as $pid => $qty) {
+            if ($products->has($pid)) {
+                $subtotal += $products[$pid]->price * $qty;
+            }
+        }
 
         try {
             DB::beginTransaction();
 
             $order = Order::create([
                 'user_id'          => auth()->id(),
-                'shop_id'          => $cartItems->first()->shop_id,
+                'shop_id'          => $cartSession['shop_id'],
                 'order_code'       => 'FH-' . now()->format('Ymd') . '-' . strtoupper(Str::random(5)),
                 'subtotal'         => $subtotal,
                 'shipping_fee'     => 0,
@@ -124,25 +141,57 @@ class CartController extends Controller
                 'note'             => $request->note,
             ]);
 
-            foreach ($cartItems as $item) {
-                OrderItem::create([
-                    'order_id'     => $order->id,
-                    'product_id'   => $item->product_id,
-                    'product_name' => $item->product->name,
-                    'product_price' => $item->product->price,
-                    'quantity'     => $item->quantity,
-                    'subtotal'     => $item->product->price * $item->quantity,
-                ]);
+            foreach ($items as $pid => $qty) {
+                if ($products->has($pid)) {
+                    $product = $products[$pid];
+                    OrderItem::create([
+                        'order_id'     => $order->id,
+                        'product_id'   => $product->id,
+                        'product_name' => $product->name,
+                        'product_price' => $product->price,
+                        'quantity'     => $qty,
+                        'subtotal'     => $product->price * $qty,
+                    ]);
+                }
             }
 
-            Cart::where('user_id', auth()->id())->delete();
+            session()->forget('cart');
 
             DB::commit();
-            return redirect()->route('cart.index')->with('success', 'Bèng đặt đơn thành công rồi!');
+            return redirect()->route('customer.orders.index')->with('success', 'Bạn đặt đơn thành công rồi!');
 
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Lỗi: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Đồng bộ giỏ hàng tạm (frontend) vào DB trước khi thanh toán
+     */
+    public function prepareCheckout(Request $request)
+    {
+        $request->validate([
+            'shop_id' => 'required|exists:shops,id',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1'
+        ]);
+
+        $cart = [
+            'shop_id' => $request->shop_id,
+            'items' => []
+        ];
+
+        foreach ($request->items as $item) {
+            $cart['items'][$item['product_id']] = $item['quantity'];
+        }
+        
+        session(['cart' => $cart]);
+
+        return response()->json([
+            'status' => 'success',
+            'redirect' => route('cart.index')
+        ]);
     }
 }
