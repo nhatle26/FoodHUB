@@ -377,7 +377,7 @@
             currentTarget.preview.style.display = 'block';
             currentTarget.box.classList.add('has-image');
 
-            // cropperModal.style.display = 'none';
+            cropperModal.style.display = 'none';
             cropper.destroy();
             cropper = null;
         });
@@ -385,5 +385,6 @@
         setupUpload('cover_image', 'cover_preview', 'cover_box', 'cover_remove', 'cover_image_data', 3/1);
         setupUpload('logo', 'logo_preview', 'logo_box', 'logo_remove', 'logo_data', 1/1);
     </script>
+
 @endpush
 

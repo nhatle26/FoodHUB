@@ -4,10 +4,10 @@
 
 @section('content')
 @php
-    $userName = $user->customer->full_name ?? ($user->shop->name ?? $user->email);
-    $userPhone = $user->customer->phone ?? ($user->shop->details->phone ?? '');
-    $userAddress = $user->customer->addresses->where('is_default', 1)->first()->address_line ?? ($user->shop->details->address ?? '');
-    $userAvatar = $user->customer->avatar ?? ($user->shop->details->logo ?? null);
+    $userName = $user->customer?->full_name ?? ($user->shop?->name ?? $user->email);
+    $userPhone = $user->customer?->phone ?? ($user->shop?->details?->phone ?? '');
+    $userAddress = $user->customer?->addresses?->where('is_default', 1)?->first()?->address_line ?? ($user->shop?->details?->address ?? '');
+    $userAvatar = $user->customer?->avatar ?? ($user->shop?->details?->logo ?? null);
 @endphp
 <div class="container py-5">
     <div class="row justify-content-center">
@@ -47,7 +47,7 @@
                     <div class="card shadow-sm border-0 rounded-4 p-4 text-center">
                         <div class="mb-3 d-flex justify-content-center">
                             @if($userAvatar)
-                                <img src="{{ asset($userAvatar) }}" class="rounded-circle shadow-sm" style="width: 150px; height: 150px; object-fit: cover;" alt="Avatar">
+                                <img src="{{ asset('storage/' . $userAvatar) }}" class="rounded-circle shadow-sm" style="width: 150px; height: 150px; object-fit: cover;" alt="Avatar">
                             @else
                                 <img src="https://ui-avatars.com/api/?name={{ urlencode($userName) }}&background=ff5a36&color=fff&size=150" class="rounded-circle shadow-sm" alt="Avatar">
                             @endif

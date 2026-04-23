@@ -21,14 +21,14 @@
                     <div class="dropdown">
                         <a class="text-decoration-none text-dark dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="me-2 fw-medium">
-                                {{ Auth::user()->customer->full_name ?? (Auth::user()->shop->name ?? Auth::user()->email) }}
+                                {{ Auth::user()->customer?->full_name ?? (Auth::user()->shop?->name ?? Auth::user()->email) }}
                             </span>
                             @php
-                                $avatarUrl = Auth::user()->customer->avatar ?? (Auth::user()->shop->details->logo ?? null);
-                                $displayName = Auth::user()->customer->full_name ?? (Auth::user()->shop->name ?? Auth::user()->email);
+                                $avatarUrl = Auth::user()->customer?->avatar ?? (Auth::user()->shop?->details?->logo ?? null);
+                                $displayName = Auth::user()->customer?->full_name ?? (Auth::user()->shop?->name ?? Auth::user()->email);
                             @endphp
                             @if($avatarUrl)
-                                <img src="{{ asset($avatarUrl) }}" class="rounded-circle shadow-sm" width="38" height="38" style="object-fit: cover;" alt="Avatar">
+                                <img src="{{ asset('storage/' . $avatarUrl) }}" class="rounded-circle shadow-sm" width="38" height="38" style="object-fit: cover;" alt="Avatar">
                             @else
                                 <img src="https://ui-avatars.com/api/?name={{ urlencode($displayName) }}&background=ff5a36&color=fff" class="rounded-circle shadow-sm" width="38" height="38" alt="Avatar">
                             @endif

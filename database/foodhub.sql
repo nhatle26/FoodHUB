@@ -60,7 +60,7 @@ CREATE TABLE `customer_addresses` (
   `user_id`        BIGINT UNSIGNED NOT NULL,
   `phone_number`   VARCHAR(15)     NOT NULL,
   `address_line`   TEXT            NOT NULL,
-  `is_default`     TINYINT(1)      NOT NULL DEFAULT 0,
+`is_default`     TINYINT(1)      NOT NULL DEFAULT 0,
   `created_at`     TIMESTAMP       NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`     TIMESTAMP       NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -113,7 +113,7 @@ CREATE TABLE `shops` (
 DROP TABLE IF EXISTS `shop_details`;
 CREATE TABLE `shop_details` (
   `shop_id`       BIGINT UNSIGNED NOT NULL,
-  `phone`         VARCHAR(15)     NOT NULL,
+`phone`         VARCHAR(15)     NOT NULL,
   `address`       TEXT            NOT NULL,
   `description`   TEXT            DEFAULT NULL,
   `cover_image`   VARCHAR(255)    DEFAULT NULL,
@@ -169,7 +169,7 @@ DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (
   `id`               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `order_code`       VARCHAR(20)     NOT NULL,
-  `user_id`          BIGINT UNSIGNED NOT NULL,
+`user_id`          BIGINT UNSIGNED NOT NULL,
   `shop_id`          BIGINT UNSIGNED NOT NULL,
   `subtotal`         DECIMAL(12,0)   NOT NULL,
   `shipping_fee`     DECIMAL(10,0)   NOT NULL DEFAULT 15000,
@@ -211,7 +211,6 @@ CREATE TABLE `order_items` (
   `order_id`      BIGINT UNSIGNED NOT NULL,
   `product_id`    BIGINT UNSIGNED NOT NULL,
   `product_name`  VARCHAR(150)    NOT NULL,
-  `product_group` VARCHAR(100)    DEFAULT NULL,
   `product_price` DECIMAL(10,0)   NOT NULL,
   `quantity`      INT UNSIGNED    NOT NULL,
   `subtotal`      DECIMAL(12,0)   NOT NULL,
@@ -219,7 +218,7 @@ CREATE TABLE `order_items` (
   `updated_at`    TIMESTAMP       NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   CONSTRAINT `order_items_order_id_foreign`   FOREIGN KEY (`order_id`)   REFERENCES `orders`(`id`)   ON DELETE CASCADE,
-  CONSTRAINT `order_items_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE RESTRICT
+CONSTRAINT `order_items_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -261,7 +260,6 @@ CREATE TABLE `vouchers` (
   `is_active`         TINYINT(1)      NOT NULL DEFAULT 1,
   `starts_at`         TIMESTAMP       NULL DEFAULT NULL,
   `expires_at`        TIMESTAMP       NULL DEFAULT NULL,
-  `conditions`        JSON            DEFAULT NULL,
   `created_at`        TIMESTAMP       NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`        TIMESTAMP       NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -358,7 +356,7 @@ INSERT INTO `categories` (`id`, `name`, `slug`, `icon`, `sort_order`, `is_active
 (1, 'Trà sữa', 'tra-sua', 'icons/trasua.png', 1, 1),
 (2, 'Đồ ăn vặt', 'do-an-vat', 'icons/doanvat.png', 2, 1),
 (3, 'Fast food', 'fast-food', 'icons/fastfood.png', 3, 1),
-(4, 'Cơm văn phòng', 'com-van-phong', 'icons/com.png', 4, 1),
+(4, 'Cơm ', 'com', 'icons/com.png', 4, 1),
 (5, 'Bánh mì', 'banh-mi', 'icons/banhmi.png', 5, 1),
 (6, 'Tráng miệng', 'trang-mieng', 'icons/trangmieng.png', 6, 1),
 (7, 'Bún phở', 'bun-pho', 'icons/bunpho.png', 7, 1),
@@ -413,7 +411,6 @@ INSERT INTO `shop_details` (`shop_id`, `phone`, `address`, `description`, `open_
 (13, '0901111113', '88 Võ Văn Tần, Quận 3, TP.HCM', 'Hải sản tươi sống nhập từ Vũng Tàu mỗi ngày. Tôm hùm, cua, mực, cá...', '10:00:00', '22:00:00'),
 (14, '0903333335', '12 Ngô Đức Kế, Quận 1, TP.HCM', 'Bánh ngọt Âu châu: croissant, tiramisu, mousse cake. Đặt bánh sinh nhật theo yêu cầu.', '08:00:00', '21:00:00'),
 (15, '0902222224', '33 Trần Quý Cáp, Quận 3, TP.HCM', 'Thịt nướng vỉa hè, không gian ngoài trời.', '17:00:00', '00:00:00');
-
 -- ------------------------------------------------------------
 --  4.2 BẢNG shop_metrics (Tách thống kê)
 -- ------------------------------------------------------------
@@ -588,10 +585,5 @@ INSERT INTO `wishlists` (`user_id`, `shop_id`) VALUES
 (15, 7), (16, 5),
 (17, 11), (18, 1),
 (19, 7), (20, 5), (20, 11);
-
-UPDATE `order_items` oi
-JOIN `products` p ON p.`id` = oi.`product_id`
-SET oi.`product_group` = p.`product_group`
-WHERE oi.`product_group` IS NULL;
 
 SET FOREIGN_KEY_CHECKS = 1;

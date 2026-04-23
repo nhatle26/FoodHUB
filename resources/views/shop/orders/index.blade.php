@@ -135,10 +135,7 @@
         <div class="empty-state">
             <div class="empty-icon"><i class="bi bi-inbox"></i></div>
             <h3>Chưa có đơn hàng nào</h3>
-            <p>Hãy tạo đơn hàng đầu tiên của bạn ngay</p>
-            <a href="{{ route('shop.orders.create') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Tạo đơn hàng mới
-            </a>
+            <p>Chưa có thông tin đơn hàng</p>
         </div>
     @endif
 @endsection

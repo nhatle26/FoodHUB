@@ -6,9 +6,9 @@
 
 @section('content')
 @php
-    $userName = $user->customer->full_name ?? ($user->shop->name ?? $user->email);
-    $userPhone = $user->customer->phone ?? ($user->shop->details->phone ?? '');
-    $userAddress = $user->customer->addresses->where('is_default', 1)->first()->address_line ?? ($user->shop->details->address ?? '');
+    $userName = $user->customer?->full_name ?? ($user->shop?->name ?? $user->email);
+    $userPhone = $user->customer?->phone ?? ($user->shop?->details?->phone ?? '');
+    $userAddress = $user->customer?->addresses?->where('is_default', 1)?->first()?->address_line ?? ($user->shop?->details?->address ?? '');
 @endphp
     <div class="admin-card" style="max-width:760px;">
         <form action="{{ route('admin.users.update', $user->id) }}" method="POST">

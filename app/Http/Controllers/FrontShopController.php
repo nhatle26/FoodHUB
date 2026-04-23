@@ -36,18 +36,21 @@ class FrontShopController extends Controller
             $menuCategories['Đang cập nhật'] = [];
         }
 
+        $details = $shop->details;
+        $metrics = $shop->metrics;
+        
         $shopData = [
             'name' => $shop->name,
             'status' => $shop->status === 'active' || $shop->status === 'approved' ? 'Đang mở cửa' : 'Đóng cửa',
-            'rating' => 4.8,
-            'reviews_count' => 124,
-            'category' => 'Món ăn', // Can be optimized if relationship is loaded
-            'address' => $shop->address,
-            'hours' => $shop->open_time && $shop->close_time 
-                ? \Carbon\Carbon::parse($shop->open_time)->format('H:i') . ' - ' . \Carbon\Carbon::parse($shop->close_time)->format('H:i') 
+            'rating' => $metrics->rating_avg ?? 0,
+            'reviews_count' => $metrics->review_count ?? 0,
+            'category' => $shop->category->name ?? 'Món ăn',
+            'address' => $details->address ?? 'Chưa cập nhật',
+            'hours' => ($details->open_time ?? false) && ($details->close_time ?? false) 
+                ? \Carbon\Carbon::parse($details->open_time)->format('H:i') . ' - ' . \Carbon\Carbon::parse($details->close_time)->format('H:i') 
                 : '07:00 - 22:00',
-            'banner' => $shop->cover_image ? asset('storage/'.$shop->cover_image) : asset('images/shop_hero.png'), 
-            'logo' => $shop->logo ? asset('storage/'.$shop->logo) : 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=200&q=80'
+            'banner' => ($details->cover_image ?? false) ? asset('storage/'.$details->cover_image) : asset('images/shop_hero.png'), 
+            'logo' => ($details->logo ?? false) ? asset('storage/'.$details->logo) : 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=200&q=80'
         ];
 
         return view('shop.show', compact('shopData', 'menuCategories', 'shop'));

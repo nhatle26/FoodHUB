@@ -37,10 +37,10 @@ class VoucherController extends Controller
         $validated = $request->validate([
             'code' => 'required|string|max:50|unique:vouchers,code',
             'type' => 'required|in:percent,fixed',
-            'value' => 'required|numeric|min:0',
-            'min_order_amount' => 'nullable|numeric|min:0',
-            'max_discount' => 'nullable|numeric|min:0',
-            'usage_limit' => 'nullable|integer|min:1',
+            'value' => 'required|numeric|min:0|max:999999999',
+            'min_order_amount' => 'nullable|numeric|min:0|max:999999999',
+            'max_discount' => 'nullable|numeric|min:0|max:999999999',
+            'usage_limit' => 'nullable|integer|min:1|max:9999',
             'expires_at' => 'nullable|date|after:today',
             'is_active' => 'boolean',
         ]);
@@ -69,10 +69,10 @@ class VoucherController extends Controller
         $validated = $request->validate([
             'code' => 'required|string|max:50|unique:vouchers,code,' . $voucher->id,
             'type' => 'required|in:percent,fixed',
-            'value' => 'required|numeric|min:0',
-            'min_order_amount' => 'nullable|numeric|min:0',
-            'max_discount' => 'nullable|numeric|min:0',
-            'usage_limit' => 'nullable|integer|min:1',
+            'value' => 'required|numeric|min:0|max:999999999',
+            'min_order_amount' => 'nullable|numeric|min:0|max:999999999',
+            'max_discount' => 'nullable|numeric|min:0|max:999999999',
+            'usage_limit' => 'nullable|integer|min:1|max:9999',
             'expires_at' => 'nullable|date',
             'is_active' => 'boolean',
         ]);

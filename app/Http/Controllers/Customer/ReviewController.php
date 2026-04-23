@@ -45,7 +45,7 @@ class ReviewController extends Controller
             // Update shop metrics
             $metric = ShopMetric::firstOrCreate(['shop_id' => $order->shop_id]);
             $metric->total_reviews += 1;
-            $metric->rating = Review::where('shop_id', $order->shop_id)->avg('rating');
+            $metric->rating_avg = Review::where('shop_id', $order->shop_id)->avg('rating');
             $metric->save();
 
             DB::commit();

@@ -17,6 +17,20 @@ class SettingController extends Controller
         return $shop;
     }
 
+    /**
+     * Lưu ảnh từ base64 string (Cropper.js)
+     */
+    private function saveBase64Image(string $base64Data, string $folder): string
+    {
+        $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $base64Data);
+        $imageData = base64_decode($imageData);
+
+        $filename = $folder . '/' . Str::uuid() . '.jpg';
+        \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $imageData);
+
+        return $filename;
+    }
+
     public function index()
     {
         $shop = $this->getShop();
@@ -34,6 +48,8 @@ class SettingController extends Controller
             'address' => 'nullable|string|max:500',
             'open_time' => 'nullable',
             'close_time' => 'nullable',
+            'cover_image_data' => 'nullable|string',
+            'logo_data' => 'nullable|string',
             'banner' => 'nullable|image|max:2048',
             'logo' => 'nullable|image|max:1024',
         ]);
@@ -42,23 +58,27 @@ class SettingController extends Controller
         if ($shop->isDirty('name')) {
             $shop->slug = Str::slug($validated['name']) . '-' . $shop->id;
         }
-        $shop->description = $validated['description'] ?? null;
         $shop->save();
 
         $details = $shop->details;
+        $details->description = $validated['description'] ?? null;
         $details->phone = $validated['phone'] ?? null;
         $details->address = $validated['address'] ?? null;
         $details->open_time = $validated['open_time'] ?? null;
         $details->close_time = $validated['close_time'] ?? null;
 
-        if ($request->hasFile('banner')) {
+        if ($request->filled('cover_image_data')) {
+            $details->cover_image = $this->saveBase64Image($request->cover_image_data, 'shops/covers');
+        } elseif ($request->hasFile('banner')) {
             $path = $request->file('banner')->store('shops/banners', 'public');
-            $details->banner = '/storage/' . $path;
+            $details->cover_image = $path;
         }
 
-        if ($request->hasFile('logo')) {
+        if ($request->filled('logo_data')) {
+            $details->logo = $this->saveBase64Image($request->logo_data, 'shops/logos');
+        } elseif ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('shops/logos', 'public');
-            $details->logo = '/storage/' . $path;
+            $details->logo = $path;
         }
 
         $details->save();

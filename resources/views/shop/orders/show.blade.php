@@ -85,7 +85,7 @@
                                 <tr>
                                     <td>{{ $item->product_name ?? 'N/A' }}</td>
                                     <td class="center">{{ $item->quantity ?? 0 }}</td>
-                                    <td class="right">{{ number_format($item->product ? $item->product->price : 0, 0, ',', '.') }}₫</td>
+                                    <td class="right">{{ number_format($item->product_price ?? 0, 0, ',', '.') }}₫</td>
                                     <td class="right price">{{ number_format($item->subtotal ?? 0, 0, ',', '.') }}₫</td>
                                 </tr>
                             @endforeach

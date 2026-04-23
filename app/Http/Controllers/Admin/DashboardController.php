@@ -23,7 +23,7 @@ class DashboardController extends Controller
         $pendingShops = Schema::hasTable('shops') ? DB::table('shops')
             ->leftJoin('shop_details', 'shops.id', '=', 'shop_details.shop_id')
             ->where('shops.status', 'pending')
-            ->select('shops.id', 'shops.name', DB::raw("COALESCE(shop_details.address, '') as address"))
+            ->select('shops.id', 'shops.name', DB::raw("COALESCE(shop_details.address, '') as address"), 'shop_details.logo')
             ->limit(3)->get() : [];
         $latestOrders = Schema::hasTable('orders') ? DB::table('orders')
             ->join('users', 'orders.user_id', '=', 'users.id')
@@ -40,7 +40,16 @@ class DashboardController extends Controller
             ->orderByDesc('orders.created_at')
             ->limit(5)
             ->get() : [];
-        $orderTrend = [130, 145, 118, 150, 175, 190, 210];
+        $orderTrend = [];
+        $trendLabels = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::today()->subDays($i);
+            $orderCountForDay = Schema::hasTable('orders') ? DB::table('orders')->whereDate('created_at', $date)->count() : 0;
+            $orderTrend[] = $orderCountForDay;
+            
+            $daysMap = [0 => 'CN', 1 => 'T2', 2 => 'T3', 3 => 'T4', 4 => 'T5', 5 => 'T6', 6 => 'T7'];
+            $trendLabels[] = $daysMap[$date->dayOfWeek];
+        }
 
         return view('admin.dashboard', compact(
             'userCount',
@@ -51,7 +60,8 @@ class DashboardController extends Controller
             'pendingShopCount',
             'pendingShops',
             'latestOrders',
-            'orderTrend'
+            'orderTrend',
+            'trendLabels'
         ));
     }
 }

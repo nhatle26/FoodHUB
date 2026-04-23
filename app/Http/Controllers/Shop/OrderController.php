@@ -126,7 +126,19 @@ class OrderController extends Controller
             'status' => 'required|in:pending,confirmed,preparing,delivering,delivered,cancelled',
         ]);
 
+        if ($validated['status'] === 'delivered' && $order->status !== 'delivered') {
+            foreach ($order->items as $item) {
+                if ($item->product) {
+                    $item->product->increment('total_sold', $item->quantity);
+                }
+            }
+        }
+
         $order->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->route('shop.orders.show', $order)->with('success', 'Đơn hàng đã được cập nhật!');
     }

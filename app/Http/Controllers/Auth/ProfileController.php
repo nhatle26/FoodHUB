@@ -37,16 +37,14 @@ class ProfileController extends Controller
         if ($request->hasFile('avatar')) {
             $avatarFile = $request->file('avatar');
             $avatarName = time() . '_' . Str::slug($request->name ?? 'avatar') . '.' . $avatarFile->getClientOriginalExtension();
-            File::ensureDirectoryExists(public_path('uploads/avatars'));
-            $avatarFile->move(public_path('uploads/avatars'), $avatarName);
-            $avatarPath = 'uploads/avatars/' . $avatarName;
+            $avatarPath = $avatarFile->storeAs('avatars', $avatarName, 'public');
         }
 
         if ($user->role === 'customer') {
             $customer = $user->customer ?? new \App\Models\Customer(['user_id' => $user->id]);
             if ($avatarPath) {
-                if ($customer->avatar && File::exists(public_path($customer->avatar))) {
-                    File::delete(public_path($customer->avatar));
+                if ($customer->avatar && \Storage::disk('public')->exists($customer->avatar)) {
+                    \Storage::disk('public')->delete($customer->avatar);
                 }
                 $customer->avatar = $avatarPath;
             }
@@ -68,8 +66,8 @@ class ProfileController extends Controller
 
                 $details = $shop->details ?? new \App\Models\ShopDetail(['shop_id' => $shop->id]);
                 if ($avatarPath) {
-                    if ($details->logo && File::exists(public_path($details->logo))) {
-                        File::delete(public_path($details->logo));
+                    if ($details->logo && \Storage::disk('public')->exists($details->logo)) {
+                        \Storage::disk('public')->delete($details->logo);
                     }
                     $details->logo = $avatarPath;
                 }

@@ -27,7 +27,7 @@
                 </a>
                 <a href="{{ route('shop.orders.index') }}" class="menu-item @if(str_contains(Route::currentRouteName(), 'orders')) active @endif">
                     <span class="menu-icon"><i class="bi bi-receipt"></i></span>
-                    <span class="menu-label">Doanh hàng</span>
+                    <span class="menu-label">Đơn hàng</span>
                 </a>
                 <a href="{{ route('shop.products.index') }}" class="menu-item @if(str_contains(Route::currentRouteName(), 'products')) active @endif">
                     <span class="menu-icon"><i class="bi bi-handbag"></i></span>

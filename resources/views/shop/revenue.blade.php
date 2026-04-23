@@ -15,7 +15,7 @@
         <div class="stat-card">
             <div class="stat-icon doanh-thu"><i class="bi bi-currency-dollar"></i></div>
             <div class="stat-content">
-                <div class="stat-value">{{ $shop->orders ? number_format($shop->orders->sum('total'), 0, ',', '.') : '0' }}₫</div>
+                <div class="stat-value">{{ number_format($totalRev, 0, ',', '.') }}₫</div>
                 <div class="stat-label">Tổng doanh thu</div>
             </div>
         </div>
@@ -23,7 +23,7 @@
         <div class="stat-card">
             <div class="stat-icon đơn-hàng"><i class="bi bi-receipt"></i></div>
             <div class="stat-content">
-                <div class="stat-value">{{ $shop->orders ? $shop->orders->count() : 0 }}</div>
+                <div class="stat-value">{{ $totalOrders }}</div>
                 <div class="stat-label">Số đơn hàng</div>
             </div>
         </div>
@@ -31,7 +31,7 @@
         <div class="stat-card">
             <div class="stat-icon doanh-thu"><i class="bi bi-graph-up"></i></div>
             <div class="stat-content">
-                <div class="stat-value">{{ $shop->orders && $shop->orders->count() > 0 ? number_format($shop->orders->sum('total') / $shop->orders->count(), 0, ',', '.') : '0' }}₫</div>
+                <div class="stat-value">{{ number_format($avgOrderValue, 0, ',', '.') }}₫</div>
                 <div class="stat-label">Đơn hàng trung bình</div>
             </div>
         </div>
@@ -143,10 +143,10 @@
             new Chart(ctxLine, {
                 type: 'line',
                 data: {
-                    labels: ['1', '5', '10', '15', '20', '25', '30'],
+                    labels: {!! json_encode($lineChartLabels) !!},
                     datasets: [{
                         label: 'Doanh thu (₫)',
-                        data: [2400000, 3200000, 2800000, 4100000, 4800000, 5200000, 4200000],
+                        data: {!! json_encode($lineChartData) !!},
                         borderColor: '#f97316',
                         backgroundColor: 'rgba(249, 115, 22, 0.05)',
                         borderWidth: 3,
@@ -186,10 +186,10 @@
             new Chart(ctxBar, {
                 type: 'bar',
                 data: {
-                    labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+                    labels: {!! json_encode($barChartLabels) !!},
                     datasets: [{
                         label: 'Doanh thu (₫)',
-                        data: [2400000, 3200000, 2800000, 4100000, 4800000, 5200000, 4200000],
+                        data: {!! json_encode($barChartData) !!},
                         backgroundColor: '#f97316',
                         borderRadius: 8,
                         borderSkipped: false,
@@ -225,7 +225,7 @@
                 data: {
                     labels: ['Đã giao', 'Đang giao', 'Đã xác nhận', 'Chờ xử lý'],
                     datasets: [{
-                        data: [45, 25, 20, 10],
+                        data: {!! json_encode($pieData) !!},
                         backgroundColor: [
                             '#10b981',
                             '#3b82f6',

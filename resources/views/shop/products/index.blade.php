@@ -24,6 +24,7 @@
                         <th>Giá</th>
                         <th>Trạng thái</th>
                         <th>Đã bán</th>
+                        <th>Doanh thu</th>
                         <th>Thao tác</th>
                     </tr>
                 </thead>
@@ -51,6 +52,7 @@
                                 @endif
                             </td>
                             <td class="sold">{{ $product->total_sold }}</td>
+                            <td class="revenue text-success fw-bold">{{ number_format($product->total_sold * $product->price, 0, ',', '.') }}₫</td>
                             <td class="actions">
                                 <a href="{{ route('shop.products.edit', $product) }}" class="action-link edit"><i class="bi bi-pencil"></i> Sửa</a>
                                 <form action="{{ route('shop.products.destroy', $product) }}" method="POST" class="action-delete">

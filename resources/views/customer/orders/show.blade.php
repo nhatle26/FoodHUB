@@ -47,8 +47,8 @@
                                         </div>
                                     </td>
                                     <td class="text-center">{{ $item->quantity }}</td>
-                                    <td class="text-end">{{ number_format($item->price, 0, ',', '.') }}₫</td>
-                                    <td class="text-end fw-medium">{{ number_format($item->price * $item->quantity, 0, ',', '.') }}₫</td>
+                                    <td class="text-end">{{ number_format($item->product_price, 0, ',', '.') }}₫</td>
+                                    <td class="text-end fw-medium">{{ number_format($item->subtotal, 0, ',', '.') }}₫</td>
                                 </tr>
                                 @endforeach
                             </tbody>

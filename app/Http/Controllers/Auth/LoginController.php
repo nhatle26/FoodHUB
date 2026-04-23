@@ -26,7 +26,7 @@ class LoginController extends Controller
             $request->session()->regenerate();
             
             $role = Auth::user()->role ?? 'customer';
-            $name = Auth::user()->customer->full_name ?? (Auth::user()->shop->name ?? Auth::user()->email);
+            $name = Auth::user()->customer?->full_name ?? (Auth::user()->shop?->name ?? Auth::user()->email);
             
             if ($role === 'admin') {
                 return redirect()->intended('/admin')

@@ -8,36 +8,36 @@
         <div class="stat-card">
             <div class="stat-icon đơn-hàng"><i class="bi bi-receipt"></i></div>
             <div class="stat-content">
-                <div class="stat-value">{{ $shop->orders ? $shop->orders->count() : 0 }}</div>
-                <div class="stat-label">Đơn hàng này</div>
-                <div class="stat-change positive">{{ $shop->orders && $shop->orders->count() > 2 ? '+' . round(($shop->orders->count() / ($shop->orders->count() - 1) - 1) * 100) . '%' : '+0%' }}</div>
+                <div class="stat-value">{{ $ordersThisMonth }}</div>
+                <div class="stat-label">Đơn hàng (tháng này)</div>
+                <div class="stat-change {{ $growthOrders >= 0 ? 'positive' : 'negative' }}">{{ $growthOrders >= 0 ? '+' : '' }}{{ $growthOrders }}%</div>
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-icon doanh-thu"><i class="bi bi-currency-dollar"></i></div>
             <div class="stat-content">
-                <div class="stat-value">{{ $shop->orders ? number_format($shop->orders->sum('total') / 1000000, 1) : 0 }}M</div>
+                <div class="stat-value">{{ $revThisMonth > 0 ? number_format($revThisMonth / 1000000, 1) . 'M' : '0' }}</div>
                 <div class="stat-label">Doanh thu</div>
-                <div class="stat-change positive">+12%</div>
+                <div class="stat-change {{ $growthRev >= 0 ? 'positive' : 'negative' }}">{{ $growthRev >= 0 ? '+' : '' }}{{ $growthRev }}%</div>
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-icon chờ-xử-lý"><i class="bi bi-clock-history"></i></div>
             <div class="stat-content">
-                <div class="stat-value">{{ $shop->orders ? $shop->orders->where('status', 'pending')->count() : 0 }}</div>
+                <div class="stat-value">{{ $pendingNow }}</div>
                 <div class="stat-label">Đơn chờ xử lý</div>
-                <div class="stat-change negative">-5%</div>
+                <div class="stat-change {{ $growthPending >= 0 ? 'positive' : 'negative' }}">{{ $growthPending >= 0 ? '+' : '' }}{{ $growthPending }}%</div>
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-icon đánh-giá"><i class="bi bi-star-fill"></i></div>
             <div class="stat-content">
-                <div class="stat-value">4.8</div>
+                <div class="stat-value">{{ number_format($avgRating, 1) }}</div>
                 <div class="stat-label">Đánh giá TB</div>
-                <div class="stat-change positive">+0.2</div>
+                <div class="stat-change {{ $growthRating >= 0 ? 'positive' : 'negative' }}">{{ $growthRating >= 0 ? '+' : '' }}{{ $growthRating }}</div>
             </div>
         </div>
     </div>
@@ -118,10 +118,10 @@
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+                    labels: {!! json_encode($chartLabels) !!},
                     datasets: [{
                         label: 'Doanh thu (₫)',
-                        data: [2400000, 3200000, 2800000, 4100000, 4800000, 5200000, 4200000],
+                        data: {!! json_encode($chartData) !!},
                         borderColor: '#f97316',
                         backgroundColor: 'rgba(249, 115, 22, 0.05)',
                         borderWidth: 3,

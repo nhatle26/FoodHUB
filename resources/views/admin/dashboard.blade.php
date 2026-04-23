@@ -65,13 +65,9 @@
             <div class="mini-chart" id="orderTrendChart">
                 <div class="trend-line" id="orderTrendLine"></div>
                 <div class="d-flex justify-content-between mt-3 text-small text-muted">
-                    <span>T2</span>
-                    <span>T3</span>
-                    <span>T4</span>
-                    <span>T5</span>
-                    <span>T6</span>
-                    <span>T7</span>
-                    <span>CN</span>
+                    @foreach($trendLabels as $label)
+                        <span>{{ $label }}</span>
+                    @endforeach
                 </div>
             </div>
         </div>
@@ -87,7 +83,11 @@
 
             @forelse($pendingShops as $shop)
                 <div class="pending-shop">
-                    <img src="https://via.placeholder.com/62" alt="shop" class="pending-shop-img">
+                    @if($shop->logo)
+                        <img src="{{ asset('storage/' . $shop->logo) }}" alt="shop" class="pending-shop-img" style="object-fit: cover;">
+                    @else
+                        <img src="https://via.placeholder.com/62" alt="shop" class="pending-shop-img">
+                    @endif
                     <div class="pending-shop-info">
                         <strong>{{ $shop->name }}</strong>
                         <small>{{ Str::limit($shop->address, 40) }}</small>

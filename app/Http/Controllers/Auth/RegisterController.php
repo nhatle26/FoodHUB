@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
 
 class RegisterController extends Controller
 {
@@ -75,7 +73,6 @@ class RegisterController extends Controller
             'description'   => 'nullable|max:500',
             'open_time'     => 'nullable|date_format:H:i',
             'close_time'    => 'nullable|date_format:H:i|after:open_time',
-            // Không ràng buộc kích thước/tỷ lệ — server sẽ tự resize
             'cover_image'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:8192',
             'logo'             => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
             // Base64 crop data (từ Cropper.js)
@@ -105,40 +102,20 @@ class RegisterController extends Controller
             'status' => 'pending',
         ]);
 
-        $manager = new ImageManager(new Driver());
-
         // Lưu ảnh bìa
         $cover_image = null;
         if ($request->filled('cover_image_data')) {
-            // Từ Cropper.js (base64)
-            $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $request->cover_image_data);
-            $imageData = base64_decode($imageData);
-            $img = $manager->read($imageData)->cover(1200, 400);
-            $filename = 'shops/covers/' . Str::uuid() . '.jpg';
-            Storage::disk('public')->put($filename, $img->toJpeg(85));
-            $cover_image = $filename;
+            $cover_image = $this->saveBase64Image($request->cover_image_data, 'shops/covers');
         } elseif ($request->hasFile('cover_image')) {
-            $img = $manager->read($request->file('cover_image')->getRealPath())->cover(1200, 400);
-            $filename = 'shops/covers/' . Str::uuid() . '.jpg';
-            Storage::disk('public')->put($filename, $img->toJpeg(85));
-            $cover_image = $filename;
+            $cover_image = $this->saveUploadedImage($request->file('cover_image'), 'shops/covers');
         }
 
         // Lưu logo
         $logo = null;
         if ($request->filled('logo_data')) {
-            // Từ Cropper.js (base64)
-            $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $request->logo_data);
-            $imageData = base64_decode($imageData);
-            $img = $manager->read($imageData)->cover(400, 400);
-            $filename = 'shops/logos/' . Str::uuid() . '.jpg';
-            Storage::disk('public')->put($filename, $img->toJpeg(85));
-            $logo = $filename;
+            $logo = $this->saveBase64Image($request->logo_data, 'shops/logos');
         } elseif ($request->hasFile('logo')) {
-            $img = $manager->read($request->file('logo')->getRealPath())->cover(400, 400);
-            $filename = 'shops/logos/' . Str::uuid() . '.jpg';
-            Storage::disk('public')->put($filename, $img->toJpeg(85));
-            $logo = $filename;
+            $logo = $this->saveUploadedImage($request->file('logo'), 'shops/logos');
         }
 
         \App\Models\ShopDetail::create([
@@ -162,6 +139,31 @@ class RegisterController extends Controller
         return redirect()->route('shop.dashboard')->with('success', 'Đăng ký shop thành công! Vui lòng hoàn tất thiết lập.');
     }
 
+    /**
+     * Lưu ảnh từ base64 string (Cropper.js) - không gọi GD library
+     */
+    private function saveBase64Image(string $base64Data, string $folder): string
+    {
+        $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $base64Data);
+        $imageData = base64_decode($imageData);
+
+        $filename = $folder . '/' . Str::uuid() . '.jpg';
+        Storage::disk('public')->put($filename, $imageData);
+
+        return $filename;
+    }
+
+    /**
+     * Lưu ảnh từ file upload fallback
+     */
+    private function saveUploadedImage($file, string $folder): string
+    {
+        $filename = $folder . '/' . Str::uuid() . '.' . $file->extension();
+        Storage::disk('public')->putFileAs($folder, $file, basename($filename));
+
+        return $filename;
+    }
+
     private function makeSlug(string $name): string
     {
         $baseSlug = Str::slug($name);
@@ -177,3 +179,4 @@ class RegisterController extends Controller
     }
 
 }
+
