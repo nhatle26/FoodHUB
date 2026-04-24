@@ -94,7 +94,14 @@
                 <a href="{{ route('shop.show', $shop->id) }}" class="text-decoration-none text-dark">
                     <div class="card shop-card h-100">
                         <div class="position-relative">
-                            <img src="{{ $shop->image ? asset('storage/'.$shop->image) : 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80' }}" class="card-img-top" alt="{{ $shop->name }}">
+                            @php
+                                $coverImg = $shop->details->cover_image ?? null;
+                                $imgUrl = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80';
+                                if ($coverImg) {
+                                    $imgUrl = str_starts_with($coverImg, 'http') ? $coverImg : asset('storage/' . preg_replace('/^\/?(storage\/)?/', '', $coverImg));
+                                }
+                            @endphp
+                            <img src="{{ $imgUrl }}" class="card-img-top" alt="{{ $shop->name }}" style="height: 200px; object-fit: cover;">
                             
                             <div class="badge-rating">
                                 <i class="fas fa-star me-1"></i> {{ $shop->rating ?? '4.8' }}

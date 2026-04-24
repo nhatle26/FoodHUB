@@ -18,8 +18,12 @@ class HomeController extends Controller
         // 3. Xử lý logic tìm kiếm (Search)
         if ($request->has('search') && $request->search != '') {
             $searchTerm = $request->search;
-            $query->where('name', 'LIKE', '%' . $searchTerm . '%')
-                  ->orWhere('description', 'LIKE', '%' . $searchTerm . '%');
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'LIKE', '%' . $searchTerm . '%')
+                  ->orWhereHas('details', function($q2) use ($searchTerm) {
+                      $q2->where('description', 'LIKE', '%' . $searchTerm . '%');
+                  });
+            });
         }
 
         // 4. Xử lý logic lọc theo danh mục (Filter)
